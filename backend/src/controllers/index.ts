@@ -1,3 +1,4 @@
+import { getAutoInsights } from "./analytics/autoInsights.controller";
 import { saveDashboard, getDashboards, getDashboardById } from "./analytics/dashboard.controller";
 import { getDeliveryRegionTrend } from "./analytics/deliveryRegionTrend.controller"
 import { getLostButLoyal } from "./analytics/lostButLoyal.controller";
@@ -10,4 +11,5 @@ export {
   getDeliveryRegionTrend,
   getLostButLoyal,
   getTopProducts,
+  getAutoInsights,
 };
