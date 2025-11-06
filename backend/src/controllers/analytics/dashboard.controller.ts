@@ -1,5 +1,5 @@
 import prisma from "../../lib/prisma";
-import { DashboardConfig } from "../../types/analytics.types";
+import { DashboardConfig } from "../../types/dashboard.types";
 import { AppError } from "../../utils/errors";
 
 const DEFAULT_CONFIG: DashboardConfig = {
