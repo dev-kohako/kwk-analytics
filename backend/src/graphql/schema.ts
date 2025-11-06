@@ -23,6 +23,13 @@ export const typeDefs = gql`
     delta_percent: Float
   }
 
+  input PeriodInput {
+    dateFrom: String!
+    dateTo: String!
+    prevDateFrom: String
+    prevDateTo: String
+  }
+
   input DeliveryRegionTrendInput {
     period: PeriodInput!
   }
