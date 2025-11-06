@@ -9,21 +9,25 @@ import {
   getDashboardById,
   getDeliveryRegionTrend,
   getLostButLoyal,
+  getTopProducts,
 } from "../controllers";
 
 import {
   SaveDashboardInput as SaveDashboardSchema,
   DeliveryRegionTrendInput as DeliveryRegionTrendSchema,
+  TopProductsInput as TopProductsSchema,
 } from "../validation/analytics.zod";
 
 type SaveDashboardInput = z.infer<typeof SaveDashboardSchema>;
 type DeliveryRegionTrendInput = z.infer<typeof DeliveryRegionTrendSchema>;
+type TopProductsInput = z.infer<typeof TopProductsSchema>;
 
 const CACHE_TTLS = {
   DASHBOARD: 60_000,
   DASHBOARDS: 60_000,
   DELIVERY_REGION_TREND: 60_000,
   LOST_LOYAL: 60_000,
+  TOP_PRODUCTS: 60_000,
 };
 
 const JSONScalar = new GraphQLScalarType({
@@ -81,6 +85,15 @@ export const resolvers = {
 
     lostButLoyal: wrapResolver(async () =>
       cacheWrap("lostButLoyal", CACHE_TTLS.LOST_LOYAL, getLostButLoyal)
+    ),
+
+    topProducts: wrapResolver(
+      async (_: unknown, { input }: { input: TopProductsInput }) => {
+        const parsed = TopProductsSchema.parse(input);
+        return cacheWrap(`topProducts:${input}`, CACHE_TTLS.TOP_PRODUCTS, () =>
+          getTopProducts(parsed)
+        );
+      }
     ),
   },
 
