@@ -15,9 +15,24 @@ export const typeDefs = gql`
     config: JSON!
   }
 
+  type DeliveryRegionTrend {
+    delivery_region: String!
+    avg_prev: Float
+    avg_cur: Float
+    delta_min: Float
+    delta_percent: Float
+  }
+
+  input DeliveryRegionTrendInput {
+    period: PeriodInput!
+  }
+
   type Query {
     dashboards: [Dashboard!]!
     dashboard(id: Int!): Dashboard
+    deliveryRegionTrend(
+      input: DeliveryRegionTrendInput!
+    ): [DeliveryRegionTrend!]!
   }
 
   type Mutation {

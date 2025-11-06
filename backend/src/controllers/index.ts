@@ -1,7 +1,9 @@
 import { saveDashboard, getDashboards, getDashboardById } from "./analytics/dashboard.controller";
+import { getDeliveryRegionTrend } from "./analytics/deliveryRegionTrend.controller"
 
 export {
   saveDashboard,
   getDashboardById,
-  getDashboards
+  getDashboards,
+  getDeliveryRegionTrend
 };
