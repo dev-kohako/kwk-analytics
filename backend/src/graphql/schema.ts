@@ -23,6 +23,18 @@ export const typeDefs = gql`
     delta_percent: Float
   }
 
+  input PeriodInput {
+    dateFrom: String!
+    dateTo: String!
+    prevDateFrom: String
+    prevDateTo: String
+  }
+
+  input DateRangeInput {
+    from: String
+    to: String
+  }
+
   input DeliveryRegionTrendInput {
     period: PeriodInput!
   }
@@ -51,7 +63,7 @@ export const typeDefs = gql`
 
   type AutoInsight {
     message: String!
-    type?: String!
+    type: String
   }
 
   enum PivotFn {
