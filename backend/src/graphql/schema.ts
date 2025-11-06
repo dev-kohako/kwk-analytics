@@ -27,12 +27,19 @@ export const typeDefs = gql`
     period: PeriodInput!
   }
 
+  type LostCustomer {
+    customer_id: ID!
+    n_orders: Int!
+    last_date: String!
+  }
+
   type Query {
     dashboards: [Dashboard!]!
     dashboard(id: Int!): Dashboard
     deliveryRegionTrend(
       input: DeliveryRegionTrendInput!
     ): [DeliveryRegionTrend!]!
+    lostButLoyal: [LostCustomer!]!
   }
 
   type Mutation {
