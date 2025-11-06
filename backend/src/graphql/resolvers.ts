@@ -7,17 +7,21 @@ import {
   saveDashboard,
   getDashboards,
   getDashboardById,
+  getDeliveryRegionTrend,
 } from "../controllers";
 
 import {
   SaveDashboardInput as SaveDashboardSchema,
+  DeliveryRegionTrendInput as DeliveryRegionTrendSchema,
 } from "../validation/analytics.zod";
 
 type SaveDashboardInput = z.infer<typeof SaveDashboardSchema>;
+type DeliveryRegionTrendInput = z.infer<typeof DeliveryRegionTrendSchema>;
 
 const CACHE_TTLS = {
   DASHBOARD: 60_000,
   DASHBOARDS: 60_000,
+  DELIVERY_REGION_TREND: 60_000,
 };
 
 const JSONScalar = new GraphQLScalarType({
@@ -57,7 +61,20 @@ export const resolvers = {
     ),
 
     dashboard: wrapResolver(async (_: unknown, { id }: { id: number }) =>
-      cacheWrap(`dashboard:${id}`, CACHE_TTLS.DASHBOARD, () => getDashboardById(id))
+      cacheWrap(`dashboard:${id}`, CACHE_TTLS.DASHBOARD, () =>
+        getDashboardById(id)
+      )
+    ),
+
+    deliveryRegionTrend: wrapResolver(
+      async (_: unknown, { input }: { input: DeliveryRegionTrendInput }) => {
+        const parsed = DeliveryRegionTrendSchema.parse(input);
+        return cacheWrap(
+          `deliveryRegionTrend:${input}`,
+          CACHE_TTLS.DELIVERY_REGION_TREND,
+          () => getDeliveryRegionTrend(parsed)
+        );
+      }
     ),
   },
 
