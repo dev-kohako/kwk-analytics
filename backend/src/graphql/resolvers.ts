@@ -86,7 +86,7 @@ export const resolvers = {
       async (_: unknown, { input }: { input: DeliveryRegionTrendInput }) => {
         const parsed = DeliveryRegionTrendSchema.parse(input);
         return cacheWrap(
-          `deliveryRegionTrend:${input}`,
+          `deliveryRegionTrend:${JSON.stringify(parsed)}`,
           CACHE_TTLS.DELIVERY_REGION_TREND,
           () => getDeliveryRegionTrend(parsed)
         );
@@ -100,8 +100,10 @@ export const resolvers = {
     topProducts: wrapResolver(
       async (_: unknown, { input }: { input: TopProductsInput }) => {
         const parsed = TopProductsSchema.parse(input);
-        return cacheWrap(`topProducts:${input}`, CACHE_TTLS.TOP_PRODUCTS, () =>
-          getTopProducts(parsed)
+        return cacheWrap(
+          `topProducts:${JSON.stringify(parsed)}`,
+          CACHE_TTLS.TOP_PRODUCTS,
+          () => getTopProducts(parsed)
         );
       }
     ),
