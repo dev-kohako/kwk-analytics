@@ -1,5 +1,5 @@
 import prisma from "../../lib/prisma";
-import { RegionTrend, RegionTrendInput } from "../../types/analytics.types";
+import { RegionTrend, RegionTrendInput } from "../../types/deliveryRegionTrend.types";
 import { AppError } from "../../utils/errors";
 
 export async function getDeliveryRegionTrend(
