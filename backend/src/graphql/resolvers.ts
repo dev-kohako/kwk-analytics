@@ -11,17 +11,24 @@ import {
   getLostButLoyal,
   getTopProducts,
   getAutoInsights,
+  runPivot,
+  getPivotFieldValues,
 } from "../controllers";
 
 import {
   SaveDashboardInput as SaveDashboardSchema,
   DeliveryRegionTrendInput as DeliveryRegionTrendSchema,
   TopProductsInput as TopProductsSchema,
+  PivotInput as PivotSchema,
+  PivotFieldInput as PivotFieldSchema,
 } from "../validation/analytics.zod";
+import { AppError } from "../utils/errors";
 
 type SaveDashboardInput = z.infer<typeof SaveDashboardSchema>;
 type DeliveryRegionTrendInput = z.infer<typeof DeliveryRegionTrendSchema>;
 type TopProductsInput = z.infer<typeof TopProductsSchema>;
+type PivotInput = z.infer<typeof PivotSchema>;
+type PivotFieldValuesInput = z.infer<typeof PivotFieldSchema>;
 
 const CACHE_TTLS = {
   DASHBOARD: 60_000,
@@ -30,6 +37,7 @@ const CACHE_TTLS = {
   LOST_LOYAL: 60_000,
   TOP_PRODUCTS: 60_000,
   AUTO_INSIGHTS: 30_000,
+  PIVOT: 60_000,
 };
 
 const JSONScalar = new GraphQLScalarType({
@@ -100,6 +108,43 @@ export const resolvers = {
 
     autoInsights: wrapResolver(async () =>
       cacheWrap("autoInsights", CACHE_TTLS.AUTO_INSIGHTS, getAutoInsights)
+    ),
+
+    pivot: wrapResolver(
+      async (_: unknown, { input }: { input: PivotInput }) => {
+        const parsed = PivotSchema.parse(input);
+        const normalized = {
+          ...parsed,
+          measures: parsed.measures.map((m) => ({
+            ...m,
+            alias: m.alias ?? undefined,
+          })),
+        };
+        const key = JSON.stringify(normalized);
+        return cacheWrap(`pivot:${key}`, CACHE_TTLS.PIVOT, () =>
+          runPivot(normalized)
+        );
+      }
+    ),
+
+    pivotFieldValues: wrapResolver(
+      async (_: unknown, { input }: { input: PivotFieldValuesInput }) => {
+        try {
+          const parsed = PivotFieldSchema.parse(input);
+          return cacheWrap(
+            `pivotFieldValues:${input.field}`,
+            CACHE_TTLS.PIVOT,
+            () => getPivotFieldValues(parsed)
+          );
+        } catch (err) {
+          console.error("Erro ao buscar valores do pivot:", err);
+          throw new AppError(
+            "Falha ao carregar valores de filtro dinâmico.",
+            400,
+            err
+          );
+        }
+      }
     ),
   },
 

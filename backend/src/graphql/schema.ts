@@ -54,6 +54,46 @@ export const typeDefs = gql`
     type?: String!
   }
 
+  enum PivotFn {
+    sum
+    avg
+    count
+    count_distinct
+    min
+    max
+  }
+
+  input PivotMeasureInput {
+    field: String!
+    fn: PivotFn!
+    alias: String
+  }
+
+  input PivotFieldValuesInput {
+    field: String!
+    search: String
+    limit: Int
+  }
+
+  input FilterInput {
+    field: String!
+    op: String!
+    value: JSON
+  }
+
+  input PivotInput {
+    dimensions: [String!]
+    measures: [PivotMeasureInput!]!
+    filters: [FilterInput!]
+    dateRange: DateRangeInput
+    limit: Int
+  }
+
+  type PivotResult {
+    rows: [JSON!]!
+    sql: String!
+  }
+
   type Query {
     dashboards: [Dashboard!]!
     dashboard(id: Int!): Dashboard
@@ -63,6 +103,8 @@ export const typeDefs = gql`
     lostButLoyal: [LostCustomer!]!
     topProducts(input: TopProductsInput!): [ProductAgg!]!
     autoInsights: [AutoInsight!]!
+    pivot(input: PivotInput!): PivotResult!
+    pivotFieldValues(input: PivotFieldValuesInput!): [String!]!
   }
 
   type Mutation {
