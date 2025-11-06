@@ -30,6 +30,11 @@ export const typeDefs = gql`
     prevDateTo: String
   }
 
+  input DateRangeInput {
+    from: String
+    to: String
+  }
+
   input DeliveryRegionTrendInput {
     period: PeriodInput!
   }
