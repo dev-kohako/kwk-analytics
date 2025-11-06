@@ -51,7 +51,7 @@ export const typeDefs = gql`
 
   type AutoInsight {
     message: String!
-    type?: String!
+    type: String
   }
 
   enum PivotFn {
