@@ -8,6 +8,7 @@ import {
   getDashboards,
   getDashboardById,
   getDeliveryRegionTrend,
+  getLostButLoyal,
 } from "../controllers";
 
 import {
@@ -22,6 +23,7 @@ const CACHE_TTLS = {
   DASHBOARD: 60_000,
   DASHBOARDS: 60_000,
   DELIVERY_REGION_TREND: 60_000,
+  LOST_LOYAL: 60_000,
 };
 
 const JSONScalar = new GraphQLScalarType({
@@ -75,6 +77,10 @@ export const resolvers = {
           () => getDeliveryRegionTrend(parsed)
         );
       }
+    ),
+
+    lostButLoyal: wrapResolver(async () =>
+      cacheWrap("lostButLoyal", CACHE_TTLS.LOST_LOYAL, getLostButLoyal)
     ),
   },
 
