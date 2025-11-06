@@ -1,0 +1,9 @@
+echo "🧪 Running frontend tests..."
+cd frontend || exit 1
+bun run test --detectOpenHandles || exit 1
+cd ..
+
+echo "🧪 Running backend tests..."
+cd backend || exit 1
+bun run jest --detectOpenHandles || exit 1
+cd ..
