@@ -13,7 +13,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Dashboard } from "@/__generated__/graphql";
+import { Dashboard } from "@/gql/graphql";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "next-themes";
 import { cn, formatCurrency } from "@/lib/utils";
