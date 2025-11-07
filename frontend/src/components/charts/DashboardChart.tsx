@@ -72,7 +72,7 @@ export function DashboardChart({ dashboard }: { dashboard: Dashboard }) {
               formatter={(v: number, name) => [formatCurrency(v), name]}
               contentStyle={{
                 background: "var(--background)",
-                border: "",
+                border: "1px solid var(--border)",
                 borderRadius: "8px",
                 color: textColor,
               }}

@@ -70,10 +70,10 @@ export function LineChart({
             formatter={(v: number) => `${v.toFixed(1)} min`}
             labelFormatter={(label) => `Região: ${label}`}
             contentStyle={{
-              background: "hsl(var(--background))",
-              border: "1px solid hsl(var(--border))",
+              background: "var(--background)",
+              border: "1px solid var(--border)",
               borderRadius: "8px",
-              color: "hsl(var(--foreground))",
+              color: "var(--foreground)",
             }}
             cursor={{ strokeDasharray: "3 3", strokeWidth: 1.2 }}
           />
