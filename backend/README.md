@@ -194,22 +194,47 @@ query {
 
 ### 🚀 Índices
 <pre>
-CREATE INDEX IF NOT EXISTS idx_sales_channel ON sales(channel);
-CREATE INDEX IF NOT EXISTS idx_sales_date ON sales(sold_date);
-CREATE INDEX IF NOT EXISTS idx_sales_store ON sales(store_id);
-CREATE INDEX IF NOT EXISTS idx_sales_product ON sales(product_id);
-</pre>
 
-### 📊 Materialized View
-<pre>
-CREATE MATERIALIZED VIEW IF NOT EXISTS mv_sales_day AS
-SELECT date_trunc('day', sold_date) AS day,
-       store_id, channel, product_id,
-       SUM(quantity) AS qty,
-       SUM(revenue)  AS rev,
-       AVG(delivery_minutes) AS avg_delivery
-FROM sales
-GROUP BY 1,2,3,4;
+-- 2️⃣ Cria a materialized view completa e compatível com o backend
+CREATE MATERIALIZED VIEW mv_sales_fact AS
+SELECT
+    s.id AS sale_id,
+    s.created_at::date AS sold_date,
+    EXTRACT(HOUR FROM s.created_at) AS hour_of_day,
+    EXTRACT(DOW FROM s.created_at) AS dow,
+    s.total_amount AS total_amount,
+    s.total_amount_items AS total_items_amount,
+    s.delivery_fee,
+    s.total_discount,
+    s.total_increase,
+    s.channel_id,
+    c.name AS channel,                      
+    st.id AS store_id,
+    st.name AS store_name,
+    st.city AS store_city,
+    st.state AS store_state,
+    st.district AS delivery_region,         
+    sb.id AS sub_brand_id,
+    sb.name AS sub_brand_name,
+    p.id AS product_id,
+    p.name AS product_name,
+    ps.quantity AS quantity,
+    ps.total_price AS product_total_price,
+    ps.total_price AS revenue,               
+    (EXTRACT(EPOCH FROM (s.created_at - s.created_at)) / 60)::NUMERIC AS delivery_minutes,
+    cu.id AS customer_id,
+    cu.customer_name AS customer_name
+FROM sales s
+JOIN product_sales ps ON ps.sale_id = s.id
+JOIN products p ON ps.product_id = p.id
+LEFT JOIN stores st ON s.store_id = st.id
+LEFT JOIN sub_brands sb ON s.sub_brand_id = sb.id
+LEFT JOIN channels c ON s.channel_id = c.id
+LEFT JOIN customers cu ON s.customer_id = cu.id;
+
+CREATE INDEX IF NOT EXISTS idx_mv_sales_fact_sold_date ON mv_sales_fact(sold_date);
+CREATE INDEX IF NOT EXISTS idx_mv_sales_fact_channel ON mv_sales_fact(channel);
+CREATE INDEX IF NOT EXISTS idx_mv_sales_fact_product_id ON mv_sales_fact(product_id);
 </pre>
 
 ### ⚙️ Comparação de períodos
