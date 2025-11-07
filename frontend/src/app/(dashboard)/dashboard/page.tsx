@@ -32,7 +32,7 @@ export default function DashboardsList() {
 
   return (
     <main
-      className="py-6 w-full max-w-7xl mx-auto space-y-8 px-4 sm:px-6 lg:px-8"
+      className="py-6 w-full max-w-7xl mx-auto space-y-8 overflow-hidden"
       aria-labelledby="dashboards-heading"
     >
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

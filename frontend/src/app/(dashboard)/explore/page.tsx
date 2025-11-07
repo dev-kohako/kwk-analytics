@@ -81,7 +81,7 @@ export default function ExplorePage() {
   }, [merged, page]);
 
   return (
-    <main className="px-3 sm:px-4 md:px-6 py-4 md:py-6 max-w-7xl mx-auto space-y-6 sm:space-y-8 overflow-hidden">
+    <main className="py-6 w-full max-w-7xl mx-auto space-y-8 overflow-hidden">
       <header className="text-center space-y-2">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center justify-center gap-2">
           <Database
