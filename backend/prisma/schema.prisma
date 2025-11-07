@@ -198,8 +198,6 @@ model product_sales {
   item_product_sales item_product_sales[]
   product            products             @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   sale               sales                @relation(fields: [sale_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([product_id, sale_id], map: "idx_product_sales_product_sale")
 }
 
 model item_product_sales {
@@ -314,9 +312,9 @@ model coupon_sales {
   sale        sales?   @relation(fields: [sale_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
-model Dashboard {
-  id        Int      @id @default(autoincrement())
-  name      String
-  config    Json
-  created_at DateTime @default(now())
+model dashboard {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(255)
+  config     Json
+  created_at DateTime? @default(now()) @db.Timestamp(6)
 }
