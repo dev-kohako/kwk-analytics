@@ -1,5 +1,6 @@
 import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client/react';
+import type * as Apollo from '@apollo/client';
+import * as ApolloReactHooks from '@apollo/client/react/hooks';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -257,17 +258,17 @@ export const GetDashboardsDocument = gql`
  *   },
  * });
  */
-export function useGetDashboardsQuery(baseOptions?: Apollo.QueryHookOptions<GetDashboardsQuery, GetDashboardsQueryVariables>) {
+export function useGetDashboardsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetDashboardsQuery, GetDashboardsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDashboardsQuery, GetDashboardsQueryVariables>(GetDashboardsDocument, options);
+        return ApolloReactHooks.useQuery<GetDashboardsQuery, GetDashboardsQueryVariables>(GetDashboardsDocument, options);
       }
-export function useGetDashboardsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDashboardsQuery, GetDashboardsQueryVariables>) {
+export function useGetDashboardsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetDashboardsQuery, GetDashboardsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDashboardsQuery, GetDashboardsQueryVariables>(GetDashboardsDocument, options);
+          return ApolloReactHooks.useLazyQuery<GetDashboardsQuery, GetDashboardsQueryVariables>(GetDashboardsDocument, options);
         }
-export function useGetDashboardsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDashboardsQuery, GetDashboardsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDashboardsQuery, GetDashboardsQueryVariables>(GetDashboardsDocument, options);
+export function useGetDashboardsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetDashboardsQuery, GetDashboardsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetDashboardsQuery, GetDashboardsQueryVariables>(GetDashboardsDocument, options);
         }
 export type GetDashboardsQueryHookResult = ReturnType<typeof useGetDashboardsQuery>;
 export type GetDashboardsLazyQueryHookResult = ReturnType<typeof useGetDashboardsLazyQuery>;
@@ -298,17 +299,17 @@ export const PivotDocument = gql`
  *   },
  * });
  */
-export function usePivotQuery(baseOptions: Apollo.QueryHookOptions<PivotQuery, PivotQueryVariables> & ({ variables: PivotQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function usePivotQuery(baseOptions: ApolloReactHooks.QueryHookOptions<PivotQuery, PivotQueryVariables> & ({ variables: PivotQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PivotQuery, PivotQueryVariables>(PivotDocument, options);
+        return ApolloReactHooks.useQuery<PivotQuery, PivotQueryVariables>(PivotDocument, options);
       }
-export function usePivotLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PivotQuery, PivotQueryVariables>) {
+export function usePivotLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<PivotQuery, PivotQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PivotQuery, PivotQueryVariables>(PivotDocument, options);
+          return ApolloReactHooks.useLazyQuery<PivotQuery, PivotQueryVariables>(PivotDocument, options);
         }
-export function usePivotSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<PivotQuery, PivotQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PivotQuery, PivotQueryVariables>(PivotDocument, options);
+export function usePivotSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<PivotQuery, PivotQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<PivotQuery, PivotQueryVariables>(PivotDocument, options);
         }
 export type PivotQueryHookResult = ReturnType<typeof usePivotQuery>;
 export type PivotLazyQueryHookResult = ReturnType<typeof usePivotLazyQuery>;
@@ -341,17 +342,17 @@ export const GetDashboardByIdDocument = gql`
  *   },
  * });
  */
-export function useGetDashboardByIdQuery(baseOptions: Apollo.QueryHookOptions<GetDashboardByIdQuery, GetDashboardByIdQueryVariables> & ({ variables: GetDashboardByIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetDashboardByIdQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetDashboardByIdQuery, GetDashboardByIdQueryVariables> & ({ variables: GetDashboardByIdQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDashboardByIdQuery, GetDashboardByIdQueryVariables>(GetDashboardByIdDocument, options);
+        return ApolloReactHooks.useQuery<GetDashboardByIdQuery, GetDashboardByIdQueryVariables>(GetDashboardByIdDocument, options);
       }
-export function useGetDashboardByIdLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDashboardByIdQuery, GetDashboardByIdQueryVariables>) {
+export function useGetDashboardByIdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetDashboardByIdQuery, GetDashboardByIdQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDashboardByIdQuery, GetDashboardByIdQueryVariables>(GetDashboardByIdDocument, options);
+          return ApolloReactHooks.useLazyQuery<GetDashboardByIdQuery, GetDashboardByIdQueryVariables>(GetDashboardByIdDocument, options);
         }
-export function useGetDashboardByIdSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDashboardByIdQuery, GetDashboardByIdQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDashboardByIdQuery, GetDashboardByIdQueryVariables>(GetDashboardByIdDocument, options);
+export function useGetDashboardByIdSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetDashboardByIdQuery, GetDashboardByIdQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetDashboardByIdQuery, GetDashboardByIdQueryVariables>(GetDashboardByIdDocument, options);
         }
 export type GetDashboardByIdQueryHookResult = ReturnType<typeof useGetDashboardByIdQuery>;
 export type GetDashboardByIdLazyQueryHookResult = ReturnType<typeof useGetDashboardByIdLazyQuery>;
@@ -380,17 +381,17 @@ export const GetAutoInsightsDocument = gql`
  *   },
  * });
  */
-export function useGetAutoInsightsQuery(baseOptions?: Apollo.QueryHookOptions<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>) {
+export function useGetAutoInsightsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>(GetAutoInsightsDocument, options);
+        return ApolloReactHooks.useQuery<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>(GetAutoInsightsDocument, options);
       }
-export function useGetAutoInsightsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>) {
+export function useGetAutoInsightsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>(GetAutoInsightsDocument, options);
+          return ApolloReactHooks.useLazyQuery<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>(GetAutoInsightsDocument, options);
         }
-export function useGetAutoInsightsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>(GetAutoInsightsDocument, options);
+export function useGetAutoInsightsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>(GetAutoInsightsDocument, options);
         }
 export type GetAutoInsightsQueryHookResult = ReturnType<typeof useGetAutoInsightsQuery>;
 export type GetAutoInsightsLazyQueryHookResult = ReturnType<typeof useGetAutoInsightsLazyQuery>;
@@ -424,17 +425,17 @@ export const GetTopProductsDocument = gql`
  *   },
  * });
  */
-export function useGetTopProductsQuery(baseOptions: Apollo.QueryHookOptions<GetTopProductsQuery, GetTopProductsQueryVariables> & ({ variables: GetTopProductsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetTopProductsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetTopProductsQuery, GetTopProductsQueryVariables> & ({ variables: GetTopProductsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetTopProductsQuery, GetTopProductsQueryVariables>(GetTopProductsDocument, options);
+        return ApolloReactHooks.useQuery<GetTopProductsQuery, GetTopProductsQueryVariables>(GetTopProductsDocument, options);
       }
-export function useGetTopProductsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetTopProductsQuery, GetTopProductsQueryVariables>) {
+export function useGetTopProductsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetTopProductsQuery, GetTopProductsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetTopProductsQuery, GetTopProductsQueryVariables>(GetTopProductsDocument, options);
+          return ApolloReactHooks.useLazyQuery<GetTopProductsQuery, GetTopProductsQueryVariables>(GetTopProductsDocument, options);
         }
-export function useGetTopProductsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetTopProductsQuery, GetTopProductsQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetTopProductsQuery, GetTopProductsQueryVariables>(GetTopProductsDocument, options);
+export function useGetTopProductsSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetTopProductsQuery, GetTopProductsQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetTopProductsQuery, GetTopProductsQueryVariables>(GetTopProductsDocument, options);
         }
 export type GetTopProductsQueryHookResult = ReturnType<typeof useGetTopProductsQuery>;
 export type GetTopProductsLazyQueryHookResult = ReturnType<typeof useGetTopProductsLazyQuery>;
@@ -468,17 +469,17 @@ export const GetDeliveryRegionTrendDocument = gql`
  *   },
  * });
  */
-export function useGetDeliveryRegionTrendQuery(baseOptions: Apollo.QueryHookOptions<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables> & ({ variables: GetDeliveryRegionTrendQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetDeliveryRegionTrendQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables> & ({ variables: GetDeliveryRegionTrendQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>(GetDeliveryRegionTrendDocument, options);
+        return ApolloReactHooks.useQuery<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>(GetDeliveryRegionTrendDocument, options);
       }
-export function useGetDeliveryRegionTrendLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>) {
+export function useGetDeliveryRegionTrendLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>(GetDeliveryRegionTrendDocument, options);
+          return ApolloReactHooks.useLazyQuery<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>(GetDeliveryRegionTrendDocument, options);
         }
-export function useGetDeliveryRegionTrendSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>(GetDeliveryRegionTrendDocument, options);
+export function useGetDeliveryRegionTrendSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>(GetDeliveryRegionTrendDocument, options);
         }
 export type GetDeliveryRegionTrendQueryHookResult = ReturnType<typeof useGetDeliveryRegionTrendQuery>;
 export type GetDeliveryRegionTrendLazyQueryHookResult = ReturnType<typeof useGetDeliveryRegionTrendLazyQuery>;
@@ -509,17 +510,17 @@ export const GetLostButLoyalDocument = gql`
  *   },
  * });
  */
-export function useGetLostButLoyalQuery(baseOptions?: Apollo.QueryHookOptions<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>) {
+export function useGetLostButLoyalQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>(GetLostButLoyalDocument, options);
+        return ApolloReactHooks.useQuery<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>(GetLostButLoyalDocument, options);
       }
-export function useGetLostButLoyalLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>) {
+export function useGetLostButLoyalLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>(GetLostButLoyalDocument, options);
+          return ApolloReactHooks.useLazyQuery<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>(GetLostButLoyalDocument, options);
         }
-export function useGetLostButLoyalSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>(GetLostButLoyalDocument, options);
+export function useGetLostButLoyalSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>(GetLostButLoyalDocument, options);
         }
 export type GetLostButLoyalQueryHookResult = ReturnType<typeof useGetLostButLoyalQuery>;
 export type GetLostButLoyalLazyQueryHookResult = ReturnType<typeof useGetLostButLoyalLazyQuery>;
@@ -554,9 +555,9 @@ export type SaveDashboardMutationFn = Apollo.MutationFunction<SaveDashboardMutat
  *   },
  * });
  */
-export function useSaveDashboardMutation(baseOptions?: Apollo.MutationHookOptions<SaveDashboardMutation, SaveDashboardMutationVariables>) {
+export function useSaveDashboardMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<SaveDashboardMutation, SaveDashboardMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<SaveDashboardMutation, SaveDashboardMutationVariables>(SaveDashboardDocument, options);
+        return ApolloReactHooks.useMutation<SaveDashboardMutation, SaveDashboardMutationVariables>(SaveDashboardDocument, options);
       }
 export type SaveDashboardMutationHookResult = ReturnType<typeof useSaveDashboardMutation>;
 export type SaveDashboardMutationResult = Apollo.MutationResult<SaveDashboardMutation>;
@@ -583,17 +584,17 @@ export const GetPivotFieldValuesDocument = gql`
  *   },
  * });
  */
-export function useGetPivotFieldValuesQuery(baseOptions: Apollo.QueryHookOptions<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables> & ({ variables: GetPivotFieldValuesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useGetPivotFieldValuesQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables> & ({ variables: GetPivotFieldValuesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>(GetPivotFieldValuesDocument, options);
+        return ApolloReactHooks.useQuery<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>(GetPivotFieldValuesDocument, options);
       }
-export function useGetPivotFieldValuesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>) {
+export function useGetPivotFieldValuesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>(GetPivotFieldValuesDocument, options);
+          return ApolloReactHooks.useLazyQuery<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>(GetPivotFieldValuesDocument, options);
         }
-export function useGetPivotFieldValuesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>) {
-          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>(GetPivotFieldValuesDocument, options);
+export function useGetPivotFieldValuesSuspenseQuery(baseOptions?: ApolloReactHooks.SkipToken | ApolloReactHooks.SuspenseQueryHookOptions<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>) {
+          const options = baseOptions === ApolloReactHooks.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useSuspenseQuery<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>(GetPivotFieldValuesDocument, options);
         }
 export type GetPivotFieldValuesQueryHookResult = ReturnType<typeof useGetPivotFieldValuesQuery>;
 export type GetPivotFieldValuesLazyQueryHookResult = ReturnType<typeof useGetPivotFieldValuesLazyQuery>;
