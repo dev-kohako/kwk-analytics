@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@apollo/client/react";
 import { toast } from "sonner";
-import { Dashboard } from "@/__generated__/graphql";
+import { Dashboard } from "@/gql/graphql";
 import { GET_DASHBOARDS } from "@/queries/dashboard.queries";
 
 export function useDashboards() {

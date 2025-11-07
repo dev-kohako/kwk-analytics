@@ -4,7 +4,7 @@ import { useMutation } from "@apollo/client/react";
 import {
   SaveDashboardMutation,
   SaveDashboardMutationVariables,
-} from "@/__generated__/graphql";
+} from "@/gql/graphql";
 import { SAVE_DASHBOARD } from "@/queries/insights.queries";
 
 export function useSaveDashboard() {

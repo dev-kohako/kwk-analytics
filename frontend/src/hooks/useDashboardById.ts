@@ -2,7 +2,7 @@
 
 import { useQuery } from "@apollo/client/react";
 import { GET_DASHBOARD_BY_ID } from "../queries/dashboard.queries";
-import { Dashboard } from "@/__generated__/graphql";
+import { Dashboard } from "@/gql/graphql";
 import { toast } from "sonner";
 
 export function useDashboardById(id: number) {

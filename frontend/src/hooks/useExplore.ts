@@ -12,7 +12,7 @@ import {
   SaveDashboardMutation,
   SaveDashboardMutationVariables,
   InputMaybe,
-} from "@/__generated__/graphql";
+} from "@/gql/graphql";
 import { ExploreSchemaType } from "@/validation/explore.zod";
 import { SAVE_DASHBOARD } from "@/queries/insights.queries";
 import { getPrevRange } from "@/lib/utils";
@@ -76,9 +76,14 @@ export function useExplore(initialFilters?: ExploreSchemaType) {
           ...input,
           dateRange: { from: prevFrom, to: prevTo },
         };
+
+        console.log("🔍 Prev range", { prevFrom, prevTo });
+
         const { data: prevData } = await runPivotPrev({
           variables: { input: prevInput },
         });
+
+        console.log("📦 Prev data", prevData?.pivot?.rows);
         setPrevious(prevData?.pivot?.rows || []);
       } else {
         setPrevious(null);

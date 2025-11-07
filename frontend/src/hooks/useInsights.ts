@@ -17,7 +17,7 @@ import {
   ProductAgg,
   SaveDashboardMutation,
   SaveDashboardMutationVariables,
-} from "@/__generated__/graphql";
+} from "@/gql/graphql";
 import { CommonFilterSchema } from "../validation/insights.zod";
 
 type Filters = z.infer<typeof CommonFilterSchema>;
