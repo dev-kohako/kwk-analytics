@@ -131,22 +131,22 @@ O projeto é composto por **dois módulos principais**:
 - Docker (opcional)
 
 ### 🔹 Clone e instale
-\`\`\bash
+<pre>
 git clone https://github.com/josephkwk/nola-challenge.git
 cd nola-challenge/frontend
 bun install
-\`\`\`
+</pre>
 
 ### 🔹 Configure o ambiente
 Crie o arquivo **.env.local**:
-\`\`\bash
+<pre>
 NEXT_PUBLIC_API_URL=http://localhost:4000/graphql
-\`\`\`
+</pre>
 
 ### 🔹 Rode o servidor
-\`\`\bash
+<pre>
 bun dev
-\`\`\`
+</pre>
 
 > O app estará disponível em http://localhost:3000
 
@@ -181,7 +181,7 @@ bun dev
 
 ## 🧱 Estrutura de Pastas
 
-\`\`\bash
+<pre>
 src/
 ├── app/
 │   ├── page.tsx
@@ -206,7 +206,7 @@ src/
 │   └── types.ts
 └── lib/
     └── utils.ts
-\`\`\`
+</pre>
 
 ---
 
