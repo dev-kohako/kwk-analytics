@@ -274,10 +274,10 @@ export default function ExplorePage() {
 
           <CardContent className="grid gap-4 sm:gap-6 p-4 sm:p-6">
             <details className="mb-2 sm:mb-4">
-              <summary className="cursor-pointer text-sm text-muted-foreground">
+              <summary className="cursor-pointer text-sm text-muted-foreground pb-3">
                 Ver SQL
               </summary>
-              <pre className="text-xs bg-muted p-3 rounded-md overflow-x-auto mt-2">
+              <pre className="text-xs sm:text-sm bg-muted p-3 sm:p-4 rounded-md w-full wrap-break-word whitespace-pre-wrap">
                 {data.pivot.sql}
               </pre>
             </details>
