@@ -31,9 +31,6 @@ export function DashboardChart({ dashboard }: { dashboard: Dashboard }) {
   const safeData =
     Array.isArray(data) && data.length > 0 ? data : [{ [xKey]: "—", value: 0 }];
 
-  const gridColor = isDark ? "#333" : "#e5e7eb";
-  const textColor = isDark ? "#e5e7eb" : "#111";
-
   return (
     <Card>
       <CardHeader>
@@ -54,17 +51,22 @@ export function DashboardChart({ dashboard }: { dashboard: Dashboard }) {
             barGap={6}
             margin={{ top: 24, right: 0, left: 8, bottom: 8 }}
           >
-            {showGrid && <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />}
+            {showGrid && (
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke={"var(--muted-foreground)"}
+              />
+            )}
 
             <XAxis
               dataKey={xKey}
-              tick={{ fill: textColor, fontSize: isMobile ? 10 : 12 }}
-              axisLine={{ stroke: gridColor }}
+              tick={{ fill: "var(--foreground)", fontSize: isMobile ? 10 : 12 }}
+              axisLine={{ stroke: "var(--muted-foreground)" }}
               tickMargin={8}
             />
             <YAxis
-              tick={{ fill: textColor, fontSize: isMobile ? 10 : 12 }}
-              axisLine={{ stroke: gridColor }}
+              tick={{ fill: "var(--foreground)", fontSize: isMobile ? 10 : 12 }}
+              axisLine={{ stroke: "var(--muted-foreground)" }}
               tickFormatter={(v) => `${v / 1000}k`}
             />
 
@@ -74,7 +76,7 @@ export function DashboardChart({ dashboard }: { dashboard: Dashboard }) {
                 background: "var(--background)",
                 border: "1px solid var(--border)",
                 borderRadius: "8px",
-                color: textColor,
+                color: "var(--foreground)",
               }}
               labelStyle={{ fontWeight: 600 }}
               cursor={{
@@ -99,10 +101,7 @@ export function DashboardChart({ dashboard }: { dashboard: Dashboard }) {
                     key={line.key}
                     dataKey={line.key}
                     name={line.name}
-                    fill={
-                      line.color ||
-                      (idx % 2 === 0 ? "#60a5fa" : "#34d399")
-                    }
+                    fill={line.color || (idx % 2 === 0 ? "#60a5fa" : "#34d399")}
                     radius={[6, 6, 0, 0]}
                   />
                 ) : (
@@ -112,8 +111,7 @@ export function DashboardChart({ dashboard }: { dashboard: Dashboard }) {
                     dataKey={line.key}
                     name={line.name}
                     stroke={
-                      line.color ||
-                      (idx % 2 === 0 ? "#60a5fa" : "#34d399")
+                      line.color || (idx % 2 === 0 ? "#60a5fa" : "#34d399")
                     }
                     strokeWidth={2}
                     dot={false}

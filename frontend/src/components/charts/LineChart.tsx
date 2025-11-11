@@ -41,7 +41,8 @@ export function LineChart({
       <ResponsiveContainer
         width={isMobile ? "120%" : "103%"}
         height={isMobile ? 220 : height}
-        className={cn("**:outline-none focus:outline-none overflow-hidden", 
+        className={cn(
+          "**:outline-none focus:outline-none overflow-hidden",
           isMobile ? "translate-x-[-13%]" : "translate-x-[-2%]"
         )}
       >
@@ -56,10 +57,12 @@ export function LineChart({
         >
           <CartesianGrid strokeDasharray="3 3" opacity={0.15} />
           <XAxis
+            tick={{ fill: "var(--foreground)", fontSize: isMobile ? 10 : 12 }}
             dataKey={xKey}
-            hide 
+            hide
           />
           <YAxis
+            tick={{ fill: "var(--foreground)", fontSize: isMobile ? 10 : 12 }}
             tickLine={false}
             axisLine={false}
             fontSize={isMobile ? 10 : 12}
@@ -80,9 +83,7 @@ export function LineChart({
           <Legend
             verticalAlign="bottom"
             align="center"
-            className={cn(
-              isMobile && "translate-x-20",
-            )}
+            className={cn(isMobile && "translate-x-20")}
             wrapperStyle={{
               paddingTop: 8,
               paddingLeft: isMobile ? 48 : 0,
