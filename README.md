@@ -196,16 +196,6 @@ src/
 
 ---
 
-## 💡 Próximos Passos
-
-- Implementar editor visual de dashboards (arrastar/soltar)
-- Adicionar autenticação multi-usuário e permissões
-- Exportar dashboards em PDF/PNG
-- Implementar cache Redis no backend
-- Otimizar materialized view incremental
-
----
-
 ## 👤 Autor
 
 **Joseph Kawe (KWK Tech)**  
@@ -219,4 +209,4 @@ Full-Stack Engineer • Founder at KWK Technologies
 ## 📜 Licença
 
 MIT © 2025 — KWK Tech.  
-Uso educacional e demonstrativo para o **Desafio Nola**.
+Uso educacional e demonstrativo.
