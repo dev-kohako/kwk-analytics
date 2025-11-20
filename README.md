@@ -165,20 +165,6 @@ bun dev
 
 ---
 
-## 📹 Demo e Apresentação
-
-🎥 **Vídeo (5–10 min)** — roteiro sugerido:
-1. Introdução à Maria (persona)
-2. Problema: “Ela tem dados, mas não tem insights.”
-3. Pivot Builder: criando análise ao vivo
-4. Comparando períodos e lendo deltas
-5. Salvando dashboard e compartilhando link
-6. KPIs automáticos e insights
-7. Arquitetura (resumo com diagrama)
-8. Encerramento (performance + próximos passos)
-
----
-
 ## 🧱 Estrutura de Pastas
 
 <pre>
