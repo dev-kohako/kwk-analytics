@@ -1,4 +1,4 @@
-# 🍽️ Nola Challenge — KWK Analytics (Frontend)
+# KWK Analytics (Frontend)
 
 > **"Power BI para Restaurantes" — Uma plataforma de analytics customizável para donos de restaurantes explorarem seus dados operacionais.**
 
