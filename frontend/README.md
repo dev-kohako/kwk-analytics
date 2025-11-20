@@ -1,13 +1,12 @@
 # 🧭 Architecture Decision Record (ADR)
 
 ## 📘 Projeto
-KWK Analytics — Frontend (Nola Challenge)
+KWK Analytics — Frontend
 
 ---
 
 ## 1. Contexto
 
-O desafio propõe a criação de uma plataforma de analytics no-code para gestores de restaurantes.
 O frontend deve oferecer uma experiência fluida, responsiva e acessível, suportando dashboards personalizados e comparações entre períodos.
 
 ---
@@ -88,24 +87,6 @@ O frontend deve oferecer uma experiência fluida, responsiva e acessível, supor
 - UI fluida e acessível em qualquer dispositivo.
 - Estrutura escalável, testável e compreensível.
 - Código limpo, com responsabilidades bem delimitadas.
-
----
-
-## 6. Próximos Passos
-
-- [ ] Adicionar modo de compartilhamento público (tokens read-only)
-- [ ] Implementar editor visual de dashboards (drag & drop)
-- [ ] Adicionar cache persistente (IndexedDB)
-- [ ] Implementar testes automatizados e CI
-- [ ] Adicionar internacionalização (i18n)
-
----
-
-## 7. Conclusão
-
-A arquitetura prioriza **clareza**, **usabilidade** e **testabilidade**, refletindo o princípio do desafio:
-> "Queremos ver como você pensa, não apenas como você codifica."
-
 ---
 
 🧑‍💻 **Autor:** Joseph Kawe — KWK Tech  
