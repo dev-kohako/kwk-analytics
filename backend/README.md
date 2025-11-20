@@ -1,4 +1,4 @@
-# 🍽️ KWK Analytics — Backend (Nola Challenge)
+# 🍽️ KWK Analytics — Backend
 
 > API GraphQL de alta performance para análise de dados operacionais de restaurantes.  
 > Desenvolvida com **Bun**, **Apollo Server**, **Prisma** e **PostgreSQL**.
@@ -319,20 +319,6 @@ Full-Stack Engineer — Next.js | GraphQL | Prisma | Bun | TypeScript
 💼 [LinkedIn](https://www.linkedin.com/in/josephkawe)
 
 ---
-
-## ✅ Status
-
-| Item | Situação |
-|-------|-----------|
-| Apollo Server + Prisma | ✅ Pronto |
-| Docker + PostgreSQL | ✅ Operacional |
-| Pivot Query | ✅ Validada |
-| Top Products / Insights | ✅ Funcionando |
-| Testes Jest | ✅ Passando |
-| Documentação e ADR | ✅ Completa |
-
----
-
 ## 📜 Licença
 
 MIT © 2025 — KWK Tech  
