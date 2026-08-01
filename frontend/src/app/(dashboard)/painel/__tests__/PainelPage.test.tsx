@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import HomePage from "../page";
+import PainelPage from "../page";
 
 jest.mock("@/store/useDashboardStore", () => ({
   useDashboardStore: () => ({ filters: {} }),
@@ -38,7 +38,7 @@ const semDados = {
   },
 };
 
-describe("HomePage", () => {
+describe("PainelPage", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("abre com os indicadores do período", () => {
@@ -51,7 +51,7 @@ describe("HomePage", () => {
       },
     });
 
-    render(<HomePage />);
+    render(<PainelPage />);
 
     expect(
       screen.getByRole("heading", { name: /sua operação/i })
@@ -81,7 +81,7 @@ describe("HomePage", () => {
       ],
     });
 
-    render(<HomePage />);
+    render(<PainelPage />);
 
     expect(screen.getByText(/precisa da sua atenção/i)).toBeInTheDocument();
     expect(screen.getByText(/Canal em retração/)).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe("HomePage", () => {
       ],
     });
 
-    render(<HomePage />);
+    render(<PainelPage />);
 
     expect(screen.getByText(/nada urgente por aqui/i)).toBeInTheDocument();
     expect(
@@ -112,7 +112,7 @@ describe("HomePage", () => {
   it("mostra os atalhos para as três áreas", () => {
     mockUseInsights.mockReturnValue(semDados);
 
-    render(<HomePage />);
+    render(<PainelPage />);
 
     expect(screen.getByText("Insights")).toBeInTheDocument();
     expect(screen.getByText("Explorar")).toBeInTheDocument();

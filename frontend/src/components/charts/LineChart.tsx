@@ -1,6 +1,7 @@
 "use client";
 
-import { cn, useIsMobile } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { is } from "date-fns/locale";
 import {
   LineChart as ReLineChart,

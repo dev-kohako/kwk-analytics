@@ -16,10 +16,11 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import {
+  Compass,
   GalleryVerticalEnd,
+  Home,
   LayoutDashboard,
   LineChart,
-  Compass,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -29,8 +30,8 @@ const navData = {
   navMain: [
     {
       title: "Painel Principal",
-      url: "/dashboard",
-      icon: LayoutDashboard,
+      url: "/painel",
+      icon: Home,
     },
     {
       title: "Insights",
@@ -41,6 +42,11 @@ const navData = {
       title: "Explorar",
       url: "/explore",
       icon: Compass,
+    },
+    {
+      title: "Dashboards",
+      url: "/dashboard",
+      icon: LayoutDashboard,
     },
   ],
 };
@@ -54,7 +60,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard" className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-3">
                 <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                   <GalleryVerticalEnd className="size-4" />
                 </div>

@@ -11,7 +11,8 @@ import {
   Legend,
 } from "recharts";
 import { useTheme } from "next-themes";
-import { cn, formatCurrency, useIsMobile } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Props = {
   data: any[];

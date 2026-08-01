@@ -15,7 +15,7 @@ export default function Loading() {
         <Loader2 className="h-10 w-10 animate-spin text-primary" aria-hidden="true" />
         <h2 className="text-lg font-semibold">Carregando...</h2>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Aguarde um momento enquanto preparamos os dados para você ⚙️
+          Aguarde um momento enquanto preparamos os dados para você.
         </p>
       </motion.div>
     </main>
