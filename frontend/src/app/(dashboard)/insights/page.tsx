@@ -1,9 +1,20 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingUp, Users, MapPin, Save } from "lucide-react";
+import { TrendingUp, Users, MapPin, Save, Copy, Download } from "lucide-react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { copyToClipboard, exportToCSV } from "@/lib/utils";
+import {
+  countBySeverity,
+  insightsToRows,
+  insightsToText,
+  sortBySeverity,
+} from "@/lib/insights";
 
 import { DashboardCard } from "@/components/dashboard/DashboardCard";
+import { InsightCard } from "@/components/dashboard/InsightCard";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
@@ -26,15 +37,28 @@ export default function InsightsPage() {
     topProducts,
     deliveryTrend,
     lostCustomers,
+    kpis,
+    aiInsightsCount,
     saveDashboard,
     loading
   } = useInsights(filters);
 
   const [dashboardName, setDashboardName] = useState("");
 
-  const totalLost = lostCustomers.length;
-  const totalLoyal = Math.floor(totalLost * 0.3);
-  const totalRecovered = Math.floor(totalLost * 0.1);
+  // O React Compiler cuida da memoização — sem useMemo manual aqui.
+  const orderedInsights = sortBySeverity(insights);
+  const severityCounts = countBySeverity(insights);
+
+  const handleExportInsights = () => {
+    exportToCSV(insightsToRows(orderedInsights), "insights-30-dias.csv");
+    toast.success("Planilha baixada.");
+  };
+
+  const handleCopySummary = async () => {
+    const ok = await copyToClipboard(insightsToText(insights));
+    if (ok) toast.success("Resumo copiado — é só colar.");
+    else toast.error("Não foi possível copiar o resumo.");
+  };
 
 const handleSaveDashboard = async () => {
   const ok = await saveDashboard(dashboardName);
@@ -99,19 +123,25 @@ const handleSaveDashboard = async () => {
       ) : (
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard
-            title="Clientes Fiéis"
-            value={totalLoyal}
-            icon={<Users className="h-5 w-5 text-blue-500" />}
+            title="Receita (30 dias)"
+            value={kpis.revenue.value}
+            previous={kpis.revenue.previous}
+            deltaPercent={kpis.revenue.deltaPercent}
+            isCurrency
+            icon={<TrendingUp className="h-5 w-5 text-emerald-500" />}
+          />
+          <KpiCard
+            title="Ticket Médio"
+            value={kpis.averageTicket.value}
+            previous={kpis.averageTicket.previous}
+            deltaPercent={kpis.averageTicket.deltaPercent}
+            isCurrency
+            icon={<TrendingUp className="h-5 w-5 text-sky-500" />}
           />
           <KpiCard
             title="Clientes Perdidos"
-            value={totalLost}
+            value={kpis.lostCustomers}
             icon={<Users className="h-5 w-5 text-red-500" />}
-          />
-          <KpiCard
-            title="Clientes Recuperados"
-            value={totalRecovered}
-            icon={<TrendingUp className="h-5 w-5 text-green-500" />}
           />
           <KpiCard
             title="Regiões Atendidas"
@@ -187,25 +217,67 @@ const handleSaveDashboard = async () => {
       )}
 
       {insights.length > 0 && (
-        <motion.section
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.25 }}
-          className="grid gap-4"
-        >
-          {insights.map((i: any, idx: number) => (
-            <DashboardCard
-              key={idx}
-              title={`Insight ${idx + 1}`}
-              subtitle="Gerado automaticamente com base nos últimos 30 dias"
-            >
-              <p
-                className="text-sm leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: i.message }}
-              />
-            </DashboardCard>
-          ))}
-        </motion.section>
+        <section className="space-y-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold tracking-tight">
+                Leituras automáticas
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Últimos 30 dias contra os 30 anteriores.
+                {aiInsightsCount > 0
+                  ? ` ${aiInsightsCount} ${aiInsightsCount === 1 ? "leitura foi gerada" : "leituras foram geradas"} por IA.`
+                  : " Análise determinística — a IA está desligada."}
+              </p>
+
+              {(severityCounts.critical || severityCounts.warning) && (
+                <div className="flex flex-wrap items-center gap-2">
+                  {severityCounts.critical > 0 && (
+                    <Badge variant="destructive">
+                      {severityCounts.critical}{" "}
+                      {severityCounts.critical === 1 ? "crítico" : "críticos"}
+                    </Badge>
+                  )}
+                  {severityCounts.warning > 0 && (
+                    <Badge variant="secondary">
+                      {severityCounts.warning}{" "}
+                      {severityCounts.warning === 1
+                        ? "ponto de atenção"
+                        : "pontos de atenção"}
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopySummary}
+                aria-label="Copiar resumo dos insights"
+              >
+                <Copy className="h-4 w-4" />
+                Copiar resumo
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportInsights}
+                aria-label="Baixar insights em planilha"
+              >
+                <Download className="h-4 w-4" />
+                Baixar planilha
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            {orderedInsights.map((insight, idx) => (
+              <InsightCard key={insight.id} insight={insight} index={idx} />
+            ))}
+          </div>
+        </section>
       )}
     </main>
   );

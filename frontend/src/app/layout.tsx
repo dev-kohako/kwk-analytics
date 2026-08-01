@@ -25,8 +25,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // next-themes injeta a classe do tema antes da hidratação — sem
+  // suppressHydrationWarning o React acusa divergência entre servidor e cliente.
   return (
-    <html lang="en">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         <Providers>
           {children}

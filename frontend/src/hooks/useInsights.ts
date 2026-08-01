@@ -82,8 +82,33 @@ export function useInsights(filters: Filters) {
   const lostCustomers = loyal.data?.lostButLoyal ?? [];
 
   const totalLost = lostCustomers.length;
-  const totalLoyal = Math.floor(totalLost * 0.3);
-  const totalRecovered = Math.floor(totalLost * 0.1);
+
+  // KPIs saem dos insights, que carregam valor atual, anterior e delta reais.
+  // Antes eram estimados multiplicando o número de clientes perdidos por um
+  // fator fixo — número inventado, sem origem nos dados.
+  const byId = (id: string) => insights.find((insight) => insight.id === id);
+
+  const revenueInsight = byId("revenue-window");
+  const ticketInsight = byId("average-ticket");
+
+  const kpis = {
+    revenue: {
+      value: revenueInsight?.value ?? null,
+      previous: revenueInsight?.previousValue ?? null,
+      deltaPercent: revenueInsight?.deltaPercent ?? null,
+    },
+    averageTicket: {
+      value: ticketInsight?.value ?? null,
+      previous: ticketInsight?.previousValue ?? null,
+      deltaPercent: ticketInsight?.deltaPercent ?? null,
+    },
+    lostCustomers: totalLost,
+    regions: deliveryTrend.length,
+  };
+
+  const aiInsightsCount = insights.filter(
+    (insight) => insight.generatedBy === "ai"
+  ).length;
 
   const saveDashboard = async (dashboardName: string) => {
     if (!dashboardName.trim()) {
@@ -97,7 +122,7 @@ export function useInsights(filters: Filters) {
       topProducts,
       deliveryTrend,
       lostCustomers,
-      kpis: { totalLost, totalLoyal, totalRecovered },
+      kpis,
     };
 
     try {
@@ -128,8 +153,8 @@ export function useInsights(filters: Filters) {
     deliveryTrend,
     lostCustomers,
     totalLost,
-    totalLoyal,
-    totalRecovered,
+    kpis,
+    aiInsightsCount,
     saveDashboard,
   };
 }
