@@ -12,22 +12,25 @@
     "prisma:generate": "prisma generate",
     "prisma:pull": "prisma db pull",
     "prisma:studio": "prisma studio",
-    "test": "jest --config jest.config.ts"
+    "test": "jest"
   },
   "dependencies": {
-    "@prisma/client": "^6.18.0",
+    "@apollo/client": "^4.0.9",
+    "@prisma/client": "^6.19.0",
     "@types/jest": "^30.0.0",
     "apollo-server": "^3.13.0",
     "apollo-server-testing": "^2.25.3",
     "dotenv": "^16.4.5",
     "graphql": "^16.12.0",
+    "ioredis": "^5.8.2",
     "jest": "^30.2.0",
+    "openai": "^6.9.1",
     "ts-jest": "^29.4.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.11.30",
-    "prisma": "^6.18.0",
+    "@types/node": "^24.10.1",
+    "prisma": "^6.19.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },
