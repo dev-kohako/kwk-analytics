@@ -1,7 +1,16 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingUp, Users, MapPin, Save, Copy, Download } from "lucide-react";
+import {
+  Copy,
+  Download,
+  MapPin,
+  Save,
+  TrendingDown,
+  TrendingUp,
+  Truck,
+  Users,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -70,7 +79,7 @@ const handleSaveDashboard = async () => {
       <header className="flex flex-col lg:flex-row items-start lg:items-center lg:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">
-            📊 Insights Analíticos
+            Insights Analíticos
           </h1>
           <p className="text-sm text-muted-foreground">
             Tendências automáticas e indicadores baseados nos dados recentes.
@@ -175,8 +184,9 @@ const handleSaveDashboard = async () => {
             title="Top Produtos"
             subtitle="Nenhum dado disponível no período selecionado."
           >
-            <p className="text-sm text-muted-foreground text-center py-10">
-              📉 Sem vendas registradas nesse intervalo.
+            <p className="flex items-center justify-center gap-2 py-10 text-center text-sm text-muted-foreground">
+              <TrendingDown className="h-4 w-4" aria-hidden="true" />
+              Sem vendas registradas nesse intervalo.
             </p>
           </DashboardCard>
         )
@@ -209,8 +219,9 @@ const handleSaveDashboard = async () => {
             title="Tendência por Região"
             subtitle="Nenhum dado disponível no período."
           >
-            <p className="text-sm text-muted-foreground text-center py-10">
-              🚚 Sem registros de entregas nesse intervalo.
+            <p className="flex items-center justify-center gap-2 py-10 text-center text-sm text-muted-foreground">
+              <Truck className="h-4 w-4" aria-hidden="true" />
+              Sem registros de entregas nesse intervalo.
             </p>
           </DashboardCard>
         )

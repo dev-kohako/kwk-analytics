@@ -3,7 +3,13 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { PlusCircle, ChevronLeft, ChevronRight, RefreshCcw } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  PlusCircle,
+  RefreshCcw,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Skeleton } from "@/components/ui/skeleton";
@@ -80,7 +86,8 @@ export default function DashboardsList() {
           role="alert"
           className="text-sm text-red-600 bg-red-50 dark:bg-red-950/20 p-3 rounded-md"
         >
-          ⚠️ Erro ao carregar dashboards: {error.message}
+          <AlertTriangle className="mr-1 inline h-4 w-4" aria-hidden="true" />
+          Erro ao carregar dashboards: {error.message}
         </p>
       )}
 
