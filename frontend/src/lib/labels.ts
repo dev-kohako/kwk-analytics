@@ -89,6 +89,34 @@ export function formatMeasure(
   }
 }
 
+/**
+ * Devolve a análise montada como frase em português.
+ *
+ * Serve de conferência antes de executar: quem monta lê de volta o que pediu,
+ * em vez de ter que interpretar a combinação de chips selecionados.
+ */
+export function describeAnalysis(
+  measures: AnyMeasure[],
+  dimensions: string[],
+  options: { comparing?: boolean } = {}
+): string {
+  if (measures.length === 0) return "Escolha ao menos uma informação para ver.";
+
+  const listar = (itens: string[]): string =>
+    itens.length <= 1
+      ? (itens[0] ?? "")
+      : `${itens.slice(0, -1).join(", ")} e ${itens[itens.length - 1]}`;
+
+  const metricas = listar(measures.map(measureLabel));
+  const cortes = listar(dimensions.map(dimensionLabel));
+
+  const base = cortes ? `${metricas} por ${cortes}` : `${metricas} no total`;
+
+  return options.comparing
+    ? `${base}, comparado com o período anterior.`
+    : `${base}.`;
+}
+
 const WEEKDAYS = [
   "Domingo",
   "Segunda",

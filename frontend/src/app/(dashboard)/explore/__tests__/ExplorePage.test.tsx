@@ -62,7 +62,8 @@ describe("ExplorePage", () => {
     expect(
       screen.getByRole("heading", { name: /pivot builder/i })
     ).toBeInTheDocument();
-    expect(screen.getByText(/configuração da análise/i)).toBeInTheDocument();
+    expect(screen.getByText(/montar análise/i)).toBeInTheDocument();
+    expect(screen.getByText(/o que você quer ver/i)).toBeInTheDocument();
     expect(screen.getByTestId("filter-builder")).toBeInTheDocument();
   });
 
@@ -146,7 +147,13 @@ describe("ExplorePage", () => {
   it("calls handleRun when executing analysis", () => {
     const handleRun = jest.fn();
     mockUseExplore.mockReturnValue({
-      filters: { dimensions: [], measures: [], filters: [] },
+      // O botão só habilita com métrica escolhida: rodar sem nenhuma não
+      // produziria análise alguma.
+      filters: {
+        dimensions: [],
+        measures: [{ fn: "sum", field: "revenue" }],
+        filters: [],
+      },
       setFilters: jest.fn(),
       handleRun,
       loading: false,
@@ -173,7 +180,8 @@ describe("ExplorePage", () => {
       setFilters: jest.fn(),
       handleRun: jest.fn(),
       loading: false,
-      data: null,
+      // Só faz sentido salvar dashboard depois de existir resultado na tela.
+      data: { pivot: { rows: [{ a: 1 }], sql: "SELECT 1" } },
       page: 1,
       setPage: jest.fn(),
       totalPages: 1,
@@ -208,7 +216,7 @@ describe("ExplorePage", () => {
     });
 
     render(<ExplorePage />);
-    fireEvent.click(screen.getByRole("button", { name: /exportar csv/i }));
+    fireEvent.click(screen.getByRole("button", { name: /baixar planilha/i }));
     expect(exportToCSV).toHaveBeenCalled();
   });
 

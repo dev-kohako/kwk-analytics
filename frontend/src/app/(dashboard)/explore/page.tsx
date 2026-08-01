@@ -18,13 +18,15 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Play, Database } from "lucide-react";
+import { Play, Database, Save, Download } from "lucide-react";
+import { ChipSelect } from "@/components/dashboard/ChipSelect";
 import { useExplore } from "@/hooks/useExplore";
 import { DIMENSIONS, MEASURES } from "@/types/types";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { cn, exportToCSV } from "@/lib/utils";
 import {
+  describeAnalysis,
   dimensionLabel,
   formatDimensionValue,
   formatMeasure,
@@ -32,6 +34,13 @@ import {
   measureKey,
   measureLabel,
 } from "@/lib/labels";
+
+/** Numerador dos passos, para o fluxo se ler como um roteiro. */
+const StepBadge = ({ children }: { children: React.ReactNode }) => (
+  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+    {children}
+  </span>
+);
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Filter, FilterBuilder } from "@/components/dashboard/FilterBuilder";
 import { Fragment, useMemo } from "react";
@@ -107,93 +116,86 @@ export default function ExplorePage() {
           Pivot Builder
         </h1>
         <p className="text-muted-foreground text-xs sm:text-sm md:text-base max-w-2xl mx-auto">
-          Monte análises personalizadas combinando dimensões, métricas e filtros
-          — sem escrever SQL.
+          Responda o que quer ver e a plataforma monta a consulta para você.
         </p>
       </header>
 
       <Card className="overflow-hidden shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base sm:text-lg">
-            ⚙️ Configuração da análise
+        <CardHeader className="px-6 py-5">
+          <CardTitle className="text-base font-semibold">
+            Montar análise
           </CardTitle>
           <CardDescription className="text-sm">
-            Dimensões, métricas, filtros e período.
+            Quatro passos. Nenhum deles exige saber SQL.
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2  gap-4 sm:gap-6">
-          <div>
-            <h2 className="font-semibold mb-2 text-sm md:text-base">
-              Dimensões
-            </h2>
-            <select
-              multiple
-              aria-label="Selecionar dimensões"
-              className="border rounded-md p-2 w-full h-28 sm:h-32 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-              value={filters.dimensions}
-              onChange={(e) =>
-                setFilters({
-                  ...filters,
-                  dimensions: Array.from(
-                    e.target.selectedOptions,
-                    (o) => o.value
-                  ),
-                })
-              }
-            >
-              {DIMENSIONS.map((d) => (
-                <option key={d} value={d}>
-                  {dimensionLabel(d)}
-                </option>
-              ))}
-            </select>
-          </div>
+        <CardContent className="space-y-8 px-6 pb-6 pt-0">
+          <section className="space-y-3">
+            <div className="space-y-1">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <StepBadge>1</StepBadge>O que você quer ver?
+              </h2>
+              <p className="pl-8 text-sm text-muted-foreground">
+                Escolha uma ou mais informações para medir.
+              </p>
+            </div>
 
-          <div>
-            <h2 className="font-semibold mb-2 text-sm md:text-base">
-              Métricas
-            </h2>
-            <select
-              multiple
-              aria-label="Selecionar métricas"
-              className="border rounded-md p-2 w-full h-28 sm:h-32 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-              value={filters.measures.map((m) => `${m.fn}:${m.field}`)}
-              onChange={(e) =>
-                setFilters({
-                  ...filters,
-                  measures: Array.from(e.target.selectedOptions, (o) => {
-                    const [fn, field] = o.value.split(":");
-                    return { fn: fn as any, field };
-                  }),
-                })
-              }
-            >
-              {MEASURES.map((m) => (
-                <option key={measureKey(m)} value={measureKey(m)}>
-                  {measureLabel(m)}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div className="pl-8">
+              <ChipSelect
+                ariaLabel="Informações a medir"
+                minOne
+                options={MEASURES.map((m) => ({
+                  value: measureKey(m),
+                  label: measureLabel(m),
+                }))}
+                selected={filters.measures.map((m) => measureKey(m))}
+                onChange={(values) =>
+                  setFilters({
+                    ...filters,
+                    measures: values.map((v) => {
+                      const [fn, field] = v.split(":");
+                      return { fn: fn as any, field };
+                    }),
+                  })
+                }
+              />
+            </div>
+          </section>
 
-          <div className="sm:col-span-2 lg:col-span-3">
-            <FilterBuilder
-              filters={filters.filters as Filter[]}
-              setFilters={(update) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  filters:
-                    typeof update === "function"
-                      ? (update(prev.filters as Filter[]) as any)
-                      : update,
-                }))
-              }
-            />
-          </div>
+          <section className="space-y-3">
+            <div className="space-y-1">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <StepBadge>2</StepBadge>Como quer separar?
+              </h2>
+              <p className="pl-8 text-sm text-muted-foreground">
+                Sem nenhum selecionado, você vê o total do período.
+              </p>
+            </div>
 
-          <div className="sm:col-span-2 lg:col-span-3 flex flex-col gap-4">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="pl-8">
+              <ChipSelect
+                ariaLabel="Como separar os resultados"
+                options={DIMENSIONS.map((d) => ({
+                  value: d,
+                  label: dimensionLabel(d),
+                }))}
+                selected={filters.dimensions ?? []}
+                onChange={(values) =>
+                  setFilters({ ...filters, dimensions: values })
+                }
+              />
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <div className="space-y-1">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <StepBadge>3</StepBadge>Em qual período?
+              </h2>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 pl-8">
               <DateRangePicker
                 value={
                   filters.dateRange?.from && filters.dateRange?.to
@@ -230,31 +232,73 @@ export default function ExplorePage() {
                 </Label>
               </div>
             </div>
+          </section>
 
-            <div className="flex flex-col lg:flex-row justify-end gap-2 sm:gap-3">
+          <section className="space-y-3">
+            <div className="space-y-1">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <StepBadge>4</StepBadge>Filtrar algo específico?
+                <span className="font-normal text-muted-foreground">
+                  (opcional)
+                </span>
+              </h2>
+            </div>
+
+            <div className="pl-8">
+              <FilterBuilder
+                filters={filters.filters as Filter[]}
+                setFilters={(update) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    filters:
+                      typeof update === "function"
+                        ? (update(prev.filters as Filter[]) as any)
+                        : update,
+                  }))
+                }
+              />
+            </div>
+          </section>
+
+          <Separator />
+
+          {/* Leitura de volta do que foi montado, em português, antes de rodar. */}
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">Você vai ver: </span>
+              {describeAnalysis(filters.measures, filters.dimensions ?? [], {
+                comparing: compare,
+              })}
+            </p>
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
               <Button
                 onClick={() => handleRun(compare)}
-                disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
+                disabled={loading || filters.measures.length === 0}
+                className="w-full sm:w-auto"
               >
-                <Play className="w-4 h-4 mr-2" aria-hidden="true" />
+                <Play className="h-4 w-4" aria-hidden="true" />
                 {loading ? "Executando..." : "Executar análise"}
               </Button>
 
               <Button
                 onClick={() => saveAsDashboard("Nova análise pivot")}
                 variant="outline"
+                disabled={!data?.pivot}
                 className="w-full sm:w-auto"
               >
-                💾 Salvar como Dashboard
+                <Save className="h-4 w-4" aria-hidden="true" />
+                Salvar como Dashboard
               </Button>
 
               <Button
-                onClick={() => exportToCSV(merged || [], "pivot_export.csv")}
+                onClick={() => exportToCSV(merged || [], "analise.csv")}
                 variant="outline"
+                disabled={merged.length === 0}
                 className="w-full sm:w-auto"
               >
-                📤 Exportar CSV
+                <Download className="h-4 w-4" aria-hidden="true" />
+                Baixar planilha
               </Button>
             </div>
           </div>
