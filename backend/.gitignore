@@ -1,0 +1,22 @@
+# dependências
+node_modules/
+
+# build
+dist/
+*.tsbuildinfo
+
+# ambiente — nunca versionar credenciais
+.env
+.env.*
+!.env.example
+
+# prisma
+prisma/generated/
+
+# logs e coverage
+*.log
+npm-debug.log*
+coverage/
+
+# sistema
+.DS_Store
