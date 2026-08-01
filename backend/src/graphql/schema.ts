@@ -61,9 +61,48 @@ export const typeDefs = gql`
     period: PeriodInput!
   }
 
+  enum InsightSeverity {
+    positive
+    info
+    warning
+    critical
+  }
+
+  enum InsightDirection {
+    up
+    down
+    flat
+  }
+
+  """
+  Origem do insight: regra determinística sobre os agregados ou modelo de linguagem.
+  """
+  enum InsightSource {
+    rule
+    ai
+  }
+
   type AutoInsight {
+    id: ID!
+    title: String!
+    "Texto puro, sem HTML — o cliente deve renderizar como texto."
     message: String!
     type: String
+    severity: InsightSeverity!
+    "Nome da métrica analisada, ex.: revenue, average_ticket."
+    metric: String
+    value: Float
+    previousValue: Float
+    deltaPercent: Float
+    direction: InsightDirection
+    "Dimensão analisada, ex.: channel, product_name, dow."
+    dimension: String
+    "Item concreto dentro da dimensão, ex.: iFood."
+    entity: String
+    suggestion: String
+    generatedBy: InsightSource!
+    "0 a 1. Nos insights de regra, reflete a força estatística do sinal."
+    confidence: Float
   }
 
   enum PivotFn {
