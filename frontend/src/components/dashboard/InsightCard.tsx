@@ -87,8 +87,13 @@ export function InsightCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.25 }}
     >
-      <Card className={cn("h-full", style.ring)}>
-        <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 pb-2">
+      <Card
+        className={cn(
+          "flex h-full flex-col gap-0 border-border/60 py-0 shadow-sm",
+          style.ring
+        )}
+      >
+        <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 px-6 pb-3 pt-5">
           <div className="flex items-start gap-2">
             <Icon className={cn("h-5 w-5 shrink-0 mt-0.5", style.iconClass)} />
             <CardTitle className="text-base leading-tight">
@@ -110,7 +115,7 @@ export function InsightCard({
           </Badge>
         </CardHeader>
 
-        <CardContent className="space-y-3">
+        <CardContent className="flex-1 space-y-3 px-6 pb-6 pt-0">
           <p className="text-sm leading-relaxed text-muted-foreground">
             {insight.message}
           </p>

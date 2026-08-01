@@ -33,30 +33,37 @@ export function DashboardCard({
     >
       <Card
         className={cn(
-          "flex flex-col border border-border/60 shadow-sm hover:shadow-md transition-shadow duration-200 bg-card/70 backdrop-blur-sm",
+          // Espaçamento único para todo card do produto: px-6, header py-5,
+          // conteúdo até pb-6. Antes cada tela usava um padding diferente.
+          "flex h-full flex-col gap-0 border border-border/60 bg-card/70 py-0 shadow-sm backdrop-blur-sm transition-shadow duration-200 hover:shadow-md",
           className
         )}
       >
         {(title || rightSection) && (
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <div>
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 px-6 py-5">
+            <div className="min-w-0 space-y-1">
               {title && (
-                <CardTitle className="text-base font-semibold tracking-tight">
+                <CardTitle className="text-base font-semibold leading-none tracking-tight">
                   {title}
                 </CardTitle>
               )}
               {subtitle && (
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {subtitle}
-                </p>
+                <p className="text-sm text-muted-foreground">{subtitle}</p>
               )}
             </div>
-            {rightSection && <div className="flex items-center gap-2">{rightSection}</div>}
+            {rightSection && (
+              <div className="flex shrink-0 items-center gap-2">
+                {rightSection}
+              </div>
+            )}
           </CardHeader>
         )}
 
         <CardContent
-          className={cn(!noPadding && "pt-0 pb-4", "flex-1 overflow-x-auto")}
+          className={cn(
+            "flex-1 overflow-x-auto",
+            noPadding ? "p-0" : "px-6 pb-6 pt-0"
+          )}
         >
           {loading ? (
             <div className="space-y-2">
