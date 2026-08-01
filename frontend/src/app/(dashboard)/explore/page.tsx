@@ -18,12 +18,37 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Play, Database } from "lucide-react";
+import { Play, Database, Save, Download, ChevronRight } from "lucide-react";
+import { ChipSelect } from "@/components/dashboard/ChipSelect";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useExplore } from "@/hooks/useExplore";
 import { DIMENSIONS, MEASURES } from "@/types/types";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { cn, exportToCSV } from "@/lib/utils";
+import {
+  describeAnalysis,
+  dimensionLabel,
+  formatDimensionValue,
+  formatMeasure,
+  measureColumn,
+  measureKey,
+  measureLabel,
+} from "@/lib/labels";
+
+/** Numerador dos passos, para o fluxo se ler como um roteiro. */
+const StepBadge = ({ children }: { children: React.ReactNode }) => (
+  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+    {children}
+  </span>
+);
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Filter, FilterBuilder } from "@/components/dashboard/FilterBuilder";
 import { Fragment, useMemo } from "react";
@@ -80,6 +105,14 @@ export default function ExplorePage() {
     return merged.slice(start, start + 10);
   }, [merged, page]);
 
+  // A tabela mostra só o que foi pedido. Antes renderizava as três métricas
+  // sempre, então quem escolhia uma via duas colunas inteiras de travessão.
+  const activeMeasures =
+    filters.measures?.length > 0 ? filters.measures : MEASURES;
+
+  // Colunas de comparação só existem quando há período anterior de fato.
+  const showComparison = Boolean(compare && previous);
+
   return (
     <main className="py-6 w-full max-w-7xl mx-auto space-y-8 overflow-hidden">
       <header className="text-center space-y-2">
@@ -91,93 +124,86 @@ export default function ExplorePage() {
           Pivot Builder
         </h1>
         <p className="text-muted-foreground text-xs sm:text-sm md:text-base max-w-2xl mx-auto">
-          Monte análises personalizadas combinando dimensões, métricas e filtros
-          — sem escrever SQL.
+          Responda o que quer ver e a plataforma monta a consulta para você.
         </p>
       </header>
 
       <Card className="overflow-hidden shadow-sm">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base sm:text-lg">
-            ⚙️ Configuração da análise
+        <CardHeader className="px-6 py-5">
+          <CardTitle className="text-base font-semibold">
+            Montar análise
           </CardTitle>
           <CardDescription className="text-sm">
-            Dimensões, métricas, filtros e período.
+            Quatro passos. Nenhum deles exige saber SQL.
           </CardDescription>
         </CardHeader>
 
-        <CardContent className="grid grid-cols-1 sm:grid-cols-2  gap-4 sm:gap-6">
-          <div>
-            <h2 className="font-semibold mb-2 text-sm md:text-base">
-              Dimensões
-            </h2>
-            <select
-              multiple
-              aria-label="Selecionar dimensões"
-              className="border rounded-md p-2 w-full h-28 sm:h-32 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-              value={filters.dimensions}
-              onChange={(e) =>
-                setFilters({
-                  ...filters,
-                  dimensions: Array.from(
-                    e.target.selectedOptions,
-                    (o) => o.value
-                  ),
-                })
-              }
-            >
-              {DIMENSIONS.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-          </div>
+        <CardContent className="space-y-8 px-6 pb-6 pt-0">
+          <section className="space-y-3">
+            <div className="space-y-1">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <StepBadge>1</StepBadge>O que você quer ver?
+              </h2>
+              <p className="pl-8 text-sm text-muted-foreground">
+                Escolha uma ou mais informações para medir.
+              </p>
+            </div>
 
-          <div>
-            <h2 className="font-semibold mb-2 text-sm md:text-base">
-              Métricas
-            </h2>
-            <select
-              multiple
-              aria-label="Selecionar métricas"
-              className="border rounded-md p-2 w-full h-28 sm:h-32 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm"
-              value={filters.measures.map((m) => `${m.fn}:${m.field}`)}
-              onChange={(e) =>
-                setFilters({
-                  ...filters,
-                  measures: Array.from(e.target.selectedOptions, (o) => {
-                    const [fn, field] = o.value.split(":");
-                    return { fn: fn as any, field };
-                  }),
-                })
-              }
-            >
-              {MEASURES.map((m) => (
-                <option key={`${m.fn}:${m.field}`} value={`${m.fn}:${m.field}`}>
-                  {m.fn}({m.field})
-                </option>
-              ))}
-            </select>
-          </div>
+            <div className="pl-8">
+              <ChipSelect
+                ariaLabel="Informações a medir"
+                minOne
+                options={MEASURES.map((m) => ({
+                  value: measureKey(m),
+                  label: measureLabel(m),
+                }))}
+                selected={filters.measures.map((m) => measureKey(m))}
+                onChange={(values) =>
+                  setFilters({
+                    ...filters,
+                    measures: values.map((v) => {
+                      const [fn, field] = v.split(":");
+                      return { fn: fn as any, field };
+                    }),
+                  })
+                }
+              />
+            </div>
+          </section>
 
-          <div className="sm:col-span-2 lg:col-span-3">
-            <FilterBuilder
-              filters={filters.filters as Filter[]}
-              setFilters={(update) =>
-                setFilters((prev) => ({
-                  ...prev,
-                  filters:
-                    typeof update === "function"
-                      ? (update(prev.filters as Filter[]) as any)
-                      : update,
-                }))
-              }
-            />
-          </div>
+          <section className="space-y-3">
+            <div className="space-y-1">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <StepBadge>2</StepBadge>Como quer separar?
+              </h2>
+              <p className="pl-8 text-sm text-muted-foreground">
+                Sem nenhum selecionado, você vê o total do período.
+              </p>
+            </div>
 
-          <div className="sm:col-span-2 lg:col-span-3 flex flex-col gap-4">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="pl-8">
+              <ChipSelect
+                ariaLabel="Como separar os resultados"
+                options={DIMENSIONS.map((d) => ({
+                  value: d,
+                  label: dimensionLabel(d),
+                }))}
+                selected={filters.dimensions ?? []}
+                onChange={(values) =>
+                  setFilters({ ...filters, dimensions: values })
+                }
+              />
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <div className="space-y-1">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <StepBadge>3</StepBadge>Em qual período?
+              </h2>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-4 pl-8">
               <DateRangePicker
                 value={
                   filters.dateRange?.from && filters.dateRange?.to
@@ -214,31 +240,73 @@ export default function ExplorePage() {
                 </Label>
               </div>
             </div>
+          </section>
 
-            <div className="flex flex-col lg:flex-row justify-end gap-2 sm:gap-3">
+          <section className="space-y-3">
+            <div className="space-y-1">
+              <h2 className="flex items-center gap-2 text-sm font-semibold">
+                <StepBadge>4</StepBadge>Filtrar algo específico?
+                <span className="font-normal text-muted-foreground">
+                  (opcional)
+                </span>
+              </h2>
+            </div>
+
+            <div className="pl-8">
+              <FilterBuilder
+                filters={filters.filters as Filter[]}
+                setFilters={(update) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    filters:
+                      typeof update === "function"
+                        ? (update(prev.filters as Filter[]) as any)
+                        : update,
+                  }))
+                }
+              />
+            </div>
+          </section>
+
+          <Separator />
+
+          {/* Leitura de volta do que foi montado, em português, antes de rodar. */}
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">Você vai ver: </span>
+              {describeAnalysis(filters.measures, filters.dimensions ?? [], {
+                comparing: compare,
+              })}
+            </p>
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
               <Button
                 onClick={() => handleRun(compare)}
-                disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
+                disabled={loading || filters.measures.length === 0}
+                className="w-full sm:w-auto"
               >
-                <Play className="w-4 h-4 mr-2" aria-hidden="true" />
+                <Play className="h-4 w-4" aria-hidden="true" />
                 {loading ? "Executando..." : "Executar análise"}
               </Button>
 
               <Button
                 onClick={() => saveAsDashboard("Nova análise pivot")}
                 variant="outline"
+                disabled={!data?.pivot}
                 className="w-full sm:w-auto"
               >
-                💾 Salvar como Dashboard
+                <Save className="h-4 w-4" aria-hidden="true" />
+                Salvar como Dashboard
               </Button>
 
               <Button
-                onClick={() => exportToCSV(merged || [], "pivot_export.csv")}
+                onClick={() => exportToCSV(merged || [], "analise.csv")}
                 variant="outline"
+                disabled={merged.length === 0}
                 className="w-full sm:w-auto"
               >
-                📤 Exportar CSV
+                <Download className="h-4 w-4" aria-hidden="true" />
+                Baixar planilha
               </Button>
             </div>
           </div>
@@ -254,86 +322,97 @@ export default function ExplorePage() {
 
       {data?.pivot && (
         <Card className="overflow-hidden shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
-              📊 Resultados da Análise
-              <Badge
-                variant="outline"
-                className="border-blue-500 text-blue-500"
-              >
-                {data.pivot.rows.length} linhas
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 px-6 py-5">
+            <div className="min-w-0 space-y-1">
+              <CardTitle className="text-base font-semibold">
+                Resultado
+              </CardTitle>
+              <CardDescription className="text-sm">
+                {describeAnalysis(
+                  filters.measures,
+                  filters.dimensions ?? [],
+                  { comparing: showComparison }
+                )}
+              </CardDescription>
+            </div>
+
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <Badge variant="secondary">
+                {data.pivot.rows.length}{" "}
+                {data.pivot.rows.length === 1 ? "resultado" : "resultados"}
               </Badge>
-              {compare && previous && (
-                <Badge variant="secondary">Comparando períodos</Badge>
+              {showComparison && (
+                <Badge variant="outline">Comparando períodos</Badge>
               )}
-            </CardTitle>
-            <CardDescription className="text-sm">
-              Consulta gerada automaticamente pelo motor de pivotagem.
-            </CardDescription>
+            </div>
           </CardHeader>
 
-          <CardContent className="grid gap-4 sm:gap-6 p-4 sm:p-6">
-            <details className="mb-2 sm:mb-4">
-              <summary className="cursor-pointer text-sm text-muted-foreground pb-3">
-                Ver SQL
-              </summary>
-              <pre className="text-xs sm:text-sm bg-muted p-3 sm:p-4 rounded-md w-full wrap-break-word whitespace-pre-wrap">
-                {data.pivot.sql}
-              </pre>
-            </details>
+          <CardContent className="space-y-4 px-6 pb-6 pt-0">
+            {data.pivot.rows.length === 0 && (
+              <div className="rounded-lg border border-dashed py-12 text-center">
+                <p className="text-sm font-medium">
+                  Nenhuma venda encontrada nesse recorte.
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Tente ampliar o período ou remover algum filtro.
+                </p>
+              </div>
+            )}
 
-            <div className="w-full overflow-x-auto rounded-md border">
-              <table className="w-full text-xs sm:text-sm border-collapse">
-                <thead className="sticky top-0 bg-muted/70 backdrop-blur-sm">
-                  <tr className="text-muted-foreground">
+            <div className="w-full overflow-x-auto rounded-lg border">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="hover:bg-transparent">
                     {filters.dimensions?.map((dim) => (
-                      <th
+                      <TableHead
                         key={dim}
-                        rowSpan={2}
-                        className="p-2 text-left font-medium border-b border-r bg-muted/50"
+                        rowSpan={showComparison ? 2 : 1}
+                        className="border-r px-4 py-3 text-left align-middle font-medium text-foreground"
                       >
-                        {dim}
-                      </th>
+                        {dimensionLabel(dim)}
+                      </TableHead>
                     ))}
-                    {MEASURES.map((m) => (
-                      <th
-                        key={m.field}
-                        colSpan={3}
-                        className="p-2 text-center font-semibold border-b border-r bg-muted/50"
+                    {activeMeasures.map((m) => (
+                      <TableHead
+                        key={measureKey(m)}
+                        colSpan={showComparison ? 3 : 1}
+                        className="border-r px-4 py-3 text-center align-middle font-semibold text-foreground"
                       >
-                        {m.fn}({m.field})
-                      </th>
+                        {measureLabel(m)}
+                      </TableHead>
                     ))}
-                  </tr>
+                  </TableRow>
 
-                  <tr className="bg-muted/30 text-muted-foreground">
-                    {MEASURES.flatMap(() => ["Atual", "Anterior", "Δ (%)"]).map(
-                      (label, idx) => (
-                        <th
-                          key={idx}
-                          className="p-2 border-r text-center font-normal"
-                        >
-                          {label}
-                        </th>
-                      )
-                    )}
-                  </tr>
-                </thead>
+                  {showComparison && (
+                    <TableRow className="hover:bg-transparent">
+                      {activeMeasures.flatMap((m) =>
+                        ["Atual", "Anterior", "Δ"].map((label) => (
+                          <TableHead
+                            key={`${measureKey(m)}-${label}`}
+                            className="border-r px-4 py-2 text-center align-middle font-normal"
+                          >
+                            {label}
+                          </TableHead>
+                        ))
+                      )}
+                    </TableRow>
+                  )}
+                </TableHeader>
 
-                <tbody>
+                <TableBody>
                   {paginatedMerged.map((row, i) => (
-                    <tr key={i} className="hover:bg-muted/20 transition-colors">
+                    <TableRow key={i}>
                       {filters.dimensions?.map((dim) => (
-                        <td
+                        <TableCell
                           key={dim}
-                          className="p-2 border-r font-medium whitespace-nowrap"
+                          className="whitespace-nowrap border-r px-4 py-3 font-medium"
                         >
-                          {String(row[dim] ?? "—")}
-                        </td>
+                          {formatDimensionValue(dim, row[dim])}
+                        </TableCell>
                       ))}
 
-                      {MEASURES.map((m) => {
-                        const base = `${m.fn}_${m.field}`;
+                      {activeMeasures.map((m) => {
+                        const base = measureColumn(m);
                         const curr = row[base];
                         const prev = row[`${base}_prev`];
                         const pct = row[`${base}_delta_pct`];
@@ -343,35 +422,35 @@ export default function ExplorePage() {
 
                         return (
                           <Fragment key={base}>
-                            <td className="p-2 border-r text-right font-medium">
-                              {typeof curr === "number"
-                                ? curr.toLocaleString("pt-BR")
-                                : "—"}
-                            </td>
-                            <td className="p-2 border-r text-right text-muted-foreground">
-                              {typeof prev === "number"
-                                ? prev.toLocaleString("pt-BR")
-                                : "—"}
-                            </td>
-                            <td
-                              className={cn(
-                                "p-2 border-r text-right font-semibold whitespace-nowrap",
-                                up && "text-emerald-600",
-                                down && "text-red-600"
-                              )}
-                            >
-                              {typeof pct === "number"
-                                ? `${(pct * 100).toFixed(1)}%`
-                                : "—"}{" "}
-                              {up ? "▲" : down ? "▼" : "•"}
-                            </td>
+                            <TableCell className="border-r px-4 py-3 text-right font-medium tabular-nums">
+                              {formatMeasure(curr, m.field)}
+                            </TableCell>
+
+                            {showComparison && (
+                              <>
+                                <TableCell className="border-r px-4 py-3 text-right text-muted-foreground tabular-nums">
+                                  {formatMeasure(prev, m.field)}
+                                </TableCell>
+                                <TableCell
+                                  className={cn(
+                                    "whitespace-nowrap border-r px-4 py-3 text-right font-semibold tabular-nums",
+                                    up && "text-emerald-600 dark:text-emerald-400",
+                                    down && "text-red-600 dark:text-red-400"
+                                  )}
+                                >
+                                  {typeof pct === "number"
+                                    ? `${up ? "+" : ""}${(pct * 100).toFixed(1)}%`
+                                    : "—"}
+                                </TableCell>
+                              </>
+                            )}
                           </Fragment>
                         );
                       })}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
 
             {totalPages > 1 && (
@@ -401,6 +480,24 @@ export default function ExplorePage() {
                   </PaginationContent>
                 </Pagination>
               </>
+            )}
+
+            {/* A consulta continua acessível, mas como detalhe técnico no rodapé
+                em vez de primeira coisa acima da tabela. Quem analisa dado
+                precisa poder auditar o número; quem não lê SQL não tropeça. */}
+            {data.pivot.rows.length > 0 && (
+              <details className="group border-t pt-4">
+                <summary className="flex cursor-pointer list-none items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  <ChevronRight
+                    className="h-4 w-4 transition-transform group-open:rotate-90"
+                    aria-hidden="true"
+                  />
+                  Ver a consulta que gerou esses números
+                </summary>
+                <pre className="mt-3 w-full overflow-x-auto whitespace-pre-wrap break-words rounded-md bg-muted p-4 text-xs">
+                  {data.pivot.sql}
+                </pre>
+              </details>
             )}
           </CardContent>
         </Card>

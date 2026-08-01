@@ -46,20 +46,22 @@ export function KpiCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="flex flex-col justify-between py-4 shadow-sm hover:shadow-md transition-shadow duration-200">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <Card className="flex h-full flex-col justify-between gap-0 border-border/60 py-0 shadow-sm transition-shadow duration-200 hover:shadow-md">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 px-6 pb-2 pt-5">
           <CardTitle className="text-sm font-medium text-muted-foreground">
             {title}
           </CardTitle>
           {icon && <div className="text-muted-foreground">{icon}</div>}
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="px-6 pb-5">
           {loading ? (
             <div className="h-8 w-24 bg-muted rounded animate-pulse" />
           ) : (
             <>
-              <p className="text-2xl font-semibold">{formattedValue}</p>
+              <p className="text-2xl font-semibold tabular-nums tracking-tight">
+                {formattedValue}
+              </p>
 
               {deltaPercent !== undefined && deltaPercent !== null && (
                 <div className="flex items-center gap-1 mt-1">

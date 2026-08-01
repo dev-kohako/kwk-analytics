@@ -3,10 +3,9 @@
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Copy, RefreshCcw } from "lucide-react";
+import { ChevronRight, Copy, RefreshCcw } from "lucide-react";
 import { useDashboardById } from "../../../../hooks/useDashboardById";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { DashboardChart } from "@/components/charts/DashboardChart";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { formatDateSmart } from "@/lib/utils";
 
 export default function DashboardDetailsPage() {
@@ -68,21 +67,25 @@ export default function DashboardDetailsPage() {
         </div>
       </header>
 
-      <DashboardChart dashboard={dashboard} />
+      <DashboardContent dashboard={dashboard} />
 
-      <Card className="w-full overflow-hidden">
-        <CardHeader>
-          <CardTitle>Configuração</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto">
-          <pre className="text-xs sm:text-sm bg-muted p-3 sm:p-4 rounded-md w-full wrap-break-word whitespace-pre-wrap">
-            {JSON.stringify(dashboard.config, null, 2)}
-          </pre>
-        </CardContent>
-      </Card>
+      {/* A configuração crua interessa a quem depura, não a quem analisa venda.
+          Sai da tela principal e vira detalhe recolhido no rodapé. */}
+      <details className="group border-t pt-4">
+        <summary className="flex cursor-pointer list-none items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <ChevronRight
+            className="h-4 w-4 transition-transform group-open:rotate-90"
+            aria-hidden="true"
+          />
+          Ver a configuração salva
+        </summary>
+        <pre className="mt-3 w-full overflow-x-auto whitespace-pre-wrap break-words rounded-md bg-muted p-4 text-xs">
+          {JSON.stringify(dashboard.config, null, 2)}
+        </pre>
+      </details>
 
-      <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-right">
-        Criado em: {formatDateSmart(dashboard.created_at)}
+      <p className="text-sm text-muted-foreground">
+        Criado em {formatDateSmart(dashboard.created_at)}
       </p>
     </main>
   );
