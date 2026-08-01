@@ -1,11 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // React Compiler desligado temporariamente: o build da Vercel falha desde que
-  // ele foi ativado, enquanto o build local passa. Sem acesso aos logs do
-  // deploy não dá para confirmar a causa, então fica desligado para não
-  // segurar produção. Reativar junto com a leitura dos logs.
-  // reactCompiler: true,
+  // O React Compiler memoiza automaticamente — dispensa useMemo/useCallback
+  // manuais e corta re-render desnecessário nas listas de insights e gráficos.
+  reactCompiler: true,
 
   transpilePackages: ["recharts"],
 
