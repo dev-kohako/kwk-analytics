@@ -68,18 +68,65 @@ export function getPrevRange(from: string, to: string) {
   };
 }
 
+/**
+ * CSV pensado para abrir direto no Excel em português.
+ *
+ * Três detalhes que decidem se o arquivo abre legível ou vira uma coluna só de
+ * caracteres quebrados: BOM UTF-8 (senão acento vira mojibake), `;` como
+ * separador (o Excel pt-BR ignora a vírgula) e decimal com vírgula (senão o
+ * número entra como texto e não soma).
+ */
+const escapeCell = (value: unknown): string => {
+  if (value === null || value === undefined) return "";
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? String(value).replace(".", ",") : "";
+  }
+
+  const text = String(value);
+  return /[";\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+};
+
 export function exportToCSV(rows: any[], filename: string) {
   if (!rows.length) return;
 
   const headers = Object.keys(rows[0]);
   const csv = [
-    headers.join(","),
-    ...rows.map((r) => headers.map((h) => JSON.stringify(r[h] ?? "")).join(",")),
-  ].join("\n");
+    headers.join(";"),
+    ...rows.map((row) => headers.map((h) => escapeCell(row[h])).join(";")),
+  ].join("\r\n");
 
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  // ﻿ é o BOM que faz o Excel reconhecer o arquivo como UTF-8.
+  const blob = new Blob(["﻿" + csv], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = filename;
+  link.href = url;
+  link.download = filename.endsWith(".csv") ? filename : `${filename}.csv`;
   link.click();
+  URL.revokeObjectURL(url);
+}
+
+/** Copia texto para a área de transferência, com fallback para navegador antigo. */
+export async function copyToClipboard(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    try {
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.style.position = "fixed";
+      area.style.opacity = "0";
+      document.body.appendChild(area);
+      area.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(area);
+      return ok;
+    } catch {
+      return false;
+    }
+  }
 }

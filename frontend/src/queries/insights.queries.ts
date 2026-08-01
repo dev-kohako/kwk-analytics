@@ -3,7 +3,21 @@ import { gql } from "@apollo/client";
 export const GET_AUTO_INSIGHTS = gql`
   query GetAutoInsights {
     autoInsights {
+      id
+      title
       message
+      type
+      severity
+      metric
+      value
+      previousValue
+      deltaPercent
+      direction
+      dimension
+      entity
+      suggestion
+      generatedBy
+      confidence
     }
   }
 `;
