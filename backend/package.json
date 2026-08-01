@@ -1,9 +1,9 @@
 {
-  "name": "nola-analytics-backend",
+  "name": "kwk-analytics-backend",
   "version": "1.0.0",
   "private": true,
   "type": "commonjs",
-  "description": "Backend do desafio God Level Coder Challenge — plataforma de analytics para restaurantes",
+  "description": "API GraphQL de analytics para operações de food service",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node --transpile-only src/index.ts",
@@ -12,7 +12,8 @@
     "prisma:generate": "prisma generate",
     "prisma:pull": "prisma db pull",
     "prisma:studio": "prisma studio",
-    "test": "jest"
+    "test": "jest",
+    "seed": "ts-node --transpile-only scripts/seed.ts"
   },
   "dependencies": {
     "@apollo/client": "^4.0.9",

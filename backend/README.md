@@ -40,7 +40,7 @@ Toda leitura analítica passa pela materialized view **`mv_sales_fact`**, que re
 ```
 backend/
 ├── prisma/
-│   └── schema.prisma            # introspectado do banco do desafio (20 models)
+│   └── schema.prisma            # introspectado da base de vendas (20 models)
 ├── src/
 │   ├── controllers/
 │   │   ├── analytics/
@@ -109,7 +109,7 @@ O `.env.example` traz as combinações prontas de `AI_BASE_URL`/`AI_MODEL` para 
 docker compose up --build
 ```
 
-Sobe dois containers: `nola-db` (PostgreSQL 16) e `nola-backend`.
+Sobe dois containers: `kwk-db` (PostgreSQL 16) e `kwk-backend`.
 API disponível em 👉 **http://localhost:4000/**
 
 > O `docker-compose.yml` fica na raiz do monorepo, não nesta pasta. O serviço lê `backend/.env` via `env_file`.
@@ -126,7 +126,7 @@ bun run dev          # ts-node --transpile-only src/index.ts
 
 ## 🗄️ Banco de dados
 
-O `schema.prisma` foi **introspectado** do banco do desafio (`prisma db pull`) e contém 20 models — entre eles `sales`, `product_sales`, `products`, `stores`, `channels`, `customers`, `delivery_sales`, `coupons`. O único model criado pela aplicação é:
+O `schema.prisma` foi **introspectado** da base de vendas (`prisma db pull`) e contém 20 models — entre eles `sales`, `product_sales`, `products`, `stores`, `channels`, `customers`, `delivery_sales`, `coupons`. O único model criado pela aplicação é:
 
 ```prisma
 model dashboard {
@@ -161,9 +161,29 @@ psql "$DATABASE_URL" -f backend/sql/mv_sales_fact.sql
 
 O script vive em [`sql/mv_sales_fact.sql`](sql/mv_sales_fact.sql) — cria a view e os três índices, e é **idempotente** (pode rodar mais de uma vez sem efeito colateral).
 
-> ⚠️ **`delivery_minutes` é um placeholder.** A expressão `s.created_at - s.created_at` sempre resulta em `0` — o dataset do desafio não traz timestamp de entrega. Enquanto não existir esse campo, a métrica `delivery_minutes` e a query `deliveryRegionTrend` retornam zeros. A correção é trocar por `entregue_em - s.created_at` assim que a coluna existir.
+> **`delivery_minutes` vem de `sales.delivery_seconds`.** A versão anterior calculava `s.created_at - s.created_at`, que é sempre zero — a métrica existia mas nunca saía do lugar. O `NULLIF` evita tratar "sem registro de entrega" como entrega instantânea, e os controllers filtram `delivery_minutes IS NOT NULL`. Vendas sem tempo registrado simplesmente não entram na média.
 
 A view é estática: após novas cargas de dados é preciso rodar `REFRESH MATERIALIZED VIEW mv_sales_fact;`.
+
+### 🌱 Dados de exemplo
+
+Para ver a plataforma funcionando sem ter uma base própria:
+
+| Comando | O que faz |
+|---|---|
+| `bun run seed` | Cria catálogo fictício e ~90 dias de vendas. Recusa rodar se já houver vendas |
+| `bun run seed -- --append` | **Não apaga nada.** Reaproveita lojas, canais, produtos e clientes existentes e só gera movimento nos últimos 90 dias |
+| `bun run seed -- --force` | Apaga o catálogo e recria do zero. Só em base descartável |
+
+Os dois modos atualizam a materialized view ao final e imprimem um resumo do que foi gerado.
+
+O conjunto é desenhado para exercitar cada análise: sexta e sábado mais fortes, leve crescimento no período, um dia de queda brusca, um canal encolhendo no último mês, poucos produtos concentrando a receita e tempo de entrega preenchido.
+
+No modo `--append` os preços saem da média já praticada em `product_sales`, então o ticket continua coerente com o histórico. As vendas geradas ficam marcadas com `origin = 'SEED'` e podem ser removidas depois:
+
+```sql
+DELETE FROM sales WHERE origin = 'SEED';
+```
 
 ### Outras otimizações
 
@@ -383,4 +403,4 @@ Zod garante o **formato**; a allow-list de `sql.ts` garante o **domínio**. Um i
 
 ## 📜 Licença
 
-MIT © 2025 — KWK Tech. Uso educacional e demonstrativo para o **Desafio Nola**.
+MIT © 2025 — KWK Tech. Uso livre para estudo e demonstração.

@@ -173,14 +173,23 @@ cd kwk-analytics
 cp backend/.env.example backend/.env   # preencha DATABASE_URL
 docker compose up --build
 ```
-> Sobe `nola-db` (Postgres 16) e `nola-backend` em **http://localhost:4000/**.
+> Sobe `kwk-db` (Postgres 16) e `kwk-backend` em **http://localhost:4000/**.
 
 ### 3. Prepare os dados
-Carregue o dataset do desafio no banco e **crie a materialized view `mv_sales_fact`** — todas as análises leem dela:
+
+**Não tem base ainda?** Um comando popula tudo com ~90 dias de vendas fictícias e já cria a materialized view:
+
+```bash
+cd backend && bun run seed
+```
+
+**Já tem base própria?** Carregue-a e crie a materialized view `mv_sales_fact` — todas as análises leem dela:
 
 ```bash
 psql "$DATABASE_URL" -f backend/sql/mv_sales_fact.sql
 ```
+
+Se a base tem histórico antigo e os últimos 30 dias aparecem vazios, `bun run seed -- --append` acrescenta movimento recente **sem apagar nada**, reaproveitando suas lojas, canais, produtos e clientes.
 
 > Detalhes e limitações em [backend/README.md](backend/README.md#-performance-e-escalabilidade).
 
@@ -270,7 +279,7 @@ ADRs completos: [frontend/README.md](frontend/README.md) e [backend/README.md](b
 ```
 .
 ├── backend/
-│   ├── prisma/schema.prisma       # schema introspectado do banco do desafio
+│   ├── prisma/schema.prisma       # schema introspectado da base de vendas
 │   ├── src/
 │   │   ├── controllers/analytics/ # pivot, topProducts, autoInsights, lostButLoyal…
 │   │   ├── graphql/               # schema.ts · resolvers.ts · context.ts
@@ -301,8 +310,7 @@ Entregue: pivot dinâmico, dashboards persistidos, insights determinísticos com
 Fora do escopo desta versão:
 - **Autenticação / multi-tenant** — a API é aberta, pensada para o ambiente de demonstração
 - **Compartilhamento por link público**
-- **Refresh automático da materialized view**
-- **Tempo de entrega real** — o dataset do desafio não traz timestamp de entrega, então `delivery_minutes` é um placeholder que retorna zero ([detalhes](backend/README.md#-performance-e-escalabilidade))
+- **Refresh automático da materialized view** — hoje o `REFRESH` é manual
 
 ---
 

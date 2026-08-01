@@ -2,7 +2,7 @@
 --  mv_sales_fact — materialized view de leitura analítica
 -- =============================================================================
 --  Passo OBRIGATÓRIO de setup: nenhum controller consulta as tabelas originais,
---  todos leem daqui. Rode este arquivo depois de carregar o dataset do desafio.
+--  todos leem daqui. Rode este arquivo depois de carregar a base de vendas.
 --
 --    psql "$DATABASE_URL" -f backend/sql/mv_sales_fact.sql
 --
