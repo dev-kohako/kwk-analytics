@@ -1,1 +1,9 @@
 node_modules
+
+# volume do postgres criado pelo docker-compose
+db_data/
+
+# rede de segurança: nenhum .env deve ser versionado em nenhum módulo
+.env
+.env.*
+!.env.example
