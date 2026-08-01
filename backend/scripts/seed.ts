@@ -37,16 +37,24 @@ function statements(file: string): string[] {
     .filter((chunk) => chunk.length > 0);
 }
 
+/**
+ * Roda o arquivo inteiro numa transação: se um comando falhar no meio, nada
+ * é gravado. Sem isso, uma falha parcial deixaria vendas sem itens no banco.
+ */
 async function run(file: string, label: string) {
   const comandos = statements(file);
-  process.stdout.write(`${label} (${comandos.length} comandos)`);
+  process.stdout.write(`${label} (${comandos.length} comandos)... `);
 
-  for (const comando of comandos) {
-    await prisma.$executeRawUnsafe(comando);
-    process.stdout.write(".");
-  }
+  await prisma.$transaction(
+    async (tx) => {
+      for (const comando of comandos) {
+        await tx.$executeRawUnsafe(comando);
+      }
+    },
+    { timeout: 180_000, maxWait: 30_000 }
+  );
 
-  process.stdout.write(" ok\n");
+  process.stdout.write("ok\n");
 }
 
 async function main() {
