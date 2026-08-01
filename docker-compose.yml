@@ -5,7 +5,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: nola-backend
+    container_name: kwk-backend
     restart: unless-stopped
     ports:
       - "4000:4000"
@@ -15,11 +15,11 @@ services:
       - db
     command: ["bun", "run", "dev"]
     networks:
-      - nola-net
+      - kwk-net
 
   db:
     image: postgres:16
-    container_name: nola-db
+    container_name: kwk-db
     restart: always
     environment:
       POSTGRES_USER: challenge
@@ -30,10 +30,10 @@ services:
     volumes:
       - ./db_data:/var/lib/postgresql/data
     networks:
-      - nola-net
+      - kwk-net
 
 networks:
-  nola-net:
+  kwk-net:
     driver: bridge
 
 volumes:
