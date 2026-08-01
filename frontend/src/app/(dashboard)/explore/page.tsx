@@ -24,6 +24,14 @@ import { DIMENSIONS, MEASURES } from "@/types/types";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { cn, exportToCSV } from "@/lib/utils";
+import {
+  dimensionLabel,
+  formatDimensionValue,
+  formatMeasure,
+  measureColumn,
+  measureKey,
+  measureLabel,
+} from "@/lib/labels";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { Filter, FilterBuilder } from "@/components/dashboard/FilterBuilder";
 import { Fragment, useMemo } from "react";
@@ -80,6 +88,14 @@ export default function ExplorePage() {
     return merged.slice(start, start + 10);
   }, [merged, page]);
 
+  // A tabela mostra só o que foi pedido. Antes renderizava as três métricas
+  // sempre, então quem escolhia uma via duas colunas inteiras de travessão.
+  const activeMeasures =
+    filters.measures?.length > 0 ? filters.measures : MEASURES;
+
+  // Colunas de comparação só existem quando há período anterior de fato.
+  const showComparison = Boolean(compare && previous);
+
   return (
     <main className="py-6 w-full max-w-7xl mx-auto space-y-8 overflow-hidden">
       <header className="text-center space-y-2">
@@ -128,7 +144,7 @@ export default function ExplorePage() {
             >
               {DIMENSIONS.map((d) => (
                 <option key={d} value={d}>
-                  {d}
+                  {dimensionLabel(d)}
                 </option>
               ))}
             </select>
@@ -154,8 +170,8 @@ export default function ExplorePage() {
               }
             >
               {MEASURES.map((m) => (
-                <option key={`${m.fn}:${m.field}`} value={`${m.fn}:${m.field}`}>
-                  {m.fn}({m.field})
+                <option key={measureKey(m)} value={measureKey(m)}>
+                  {measureLabel(m)}
                 </option>
               ))}
             </select>
@@ -289,35 +305,37 @@ export default function ExplorePage() {
                     {filters.dimensions?.map((dim) => (
                       <th
                         key={dim}
-                        rowSpan={2}
-                        className="p-2 text-left font-medium border-b border-r bg-muted/50"
+                        rowSpan={showComparison ? 2 : 1}
+                        className="px-4 py-3 text-left font-medium border-b border-r bg-muted/50"
                       >
-                        {dim}
+                        {dimensionLabel(dim)}
                       </th>
                     ))}
-                    {MEASURES.map((m) => (
+                    {activeMeasures.map((m) => (
                       <th
-                        key={m.field}
-                        colSpan={3}
-                        className="p-2 text-center font-semibold border-b border-r bg-muted/50"
+                        key={measureKey(m)}
+                        colSpan={showComparison ? 3 : 1}
+                        className="px-4 py-3 text-center font-semibold border-b border-r bg-muted/50"
                       >
-                        {m.fn}({m.field})
+                        {measureLabel(m)}
                       </th>
                     ))}
                   </tr>
 
-                  <tr className="bg-muted/30 text-muted-foreground">
-                    {MEASURES.flatMap(() => ["Atual", "Anterior", "Δ (%)"]).map(
-                      (label, idx) => (
-                        <th
-                          key={idx}
-                          className="p-2 border-r text-center font-normal"
-                        >
-                          {label}
-                        </th>
-                      )
-                    )}
-                  </tr>
+                  {showComparison && (
+                    <tr className="bg-muted/30 text-muted-foreground">
+                      {activeMeasures.flatMap((m) =>
+                        ["Atual", "Anterior", "Δ"].map((label) => (
+                          <th
+                            key={`${measureKey(m)}-${label}`}
+                            className="px-4 py-2 border-r text-center font-normal"
+                          >
+                            {label}
+                          </th>
+                        ))
+                      )}
+                    </tr>
+                  )}
                 </thead>
 
                 <tbody>
@@ -326,14 +344,14 @@ export default function ExplorePage() {
                       {filters.dimensions?.map((dim) => (
                         <td
                           key={dim}
-                          className="p-2 border-r font-medium whitespace-nowrap"
+                          className="px-4 py-3 border-r font-medium whitespace-nowrap"
                         >
-                          {String(row[dim] ?? "—")}
+                          {formatDimensionValue(dim, row[dim])}
                         </td>
                       ))}
 
-                      {MEASURES.map((m) => {
-                        const base = `${m.fn}_${m.field}`;
+                      {activeMeasures.map((m) => {
+                        const base = measureColumn(m);
                         const curr = row[base];
                         const prev = row[`${base}_prev`];
                         const pct = row[`${base}_delta_pct`];
@@ -343,28 +361,28 @@ export default function ExplorePage() {
 
                         return (
                           <Fragment key={base}>
-                            <td className="p-2 border-r text-right font-medium">
-                              {typeof curr === "number"
-                                ? curr.toLocaleString("pt-BR")
-                                : "—"}
+                            <td className="px-4 py-3 border-r text-right font-medium tabular-nums">
+                              {formatMeasure(curr, m.field)}
                             </td>
-                            <td className="p-2 border-r text-right text-muted-foreground">
-                              {typeof prev === "number"
-                                ? prev.toLocaleString("pt-BR")
-                                : "—"}
-                            </td>
-                            <td
-                              className={cn(
-                                "p-2 border-r text-right font-semibold whitespace-nowrap",
-                                up && "text-emerald-600",
-                                down && "text-red-600"
-                              )}
-                            >
-                              {typeof pct === "number"
-                                ? `${(pct * 100).toFixed(1)}%`
-                                : "—"}{" "}
-                              {up ? "▲" : down ? "▼" : "•"}
-                            </td>
+
+                            {showComparison && (
+                              <>
+                                <td className="px-4 py-3 border-r text-right text-muted-foreground tabular-nums">
+                                  {formatMeasure(prev, m.field)}
+                                </td>
+                                <td
+                                  className={cn(
+                                    "px-4 py-3 border-r text-right font-semibold whitespace-nowrap tabular-nums",
+                                    up && "text-emerald-600 dark:text-emerald-400",
+                                    down && "text-red-600 dark:text-red-400"
+                                  )}
+                                >
+                                  {typeof pct === "number"
+                                    ? `${up ? "+" : ""}${(pct * 100).toFixed(1)}%`
+                                    : "—"}
+                                </td>
+                              </>
+                            )}
                           </Fragment>
                         );
                       })}
