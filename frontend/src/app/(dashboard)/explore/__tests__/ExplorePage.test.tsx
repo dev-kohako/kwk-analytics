@@ -116,7 +116,8 @@ describe("ExplorePage", () => {
     });
 
     render(<ExplorePage />);
-    expect(screen.getByText(/resultados da análise/i)).toBeInTheDocument();
+    // CardTitle do shadcn renderiza como div, então não há papel de heading.
+    expect(screen.getByText("Resultado", { exact: true })).toBeInTheDocument();
     expect(screen.getByText(/Sul/)).toBeInTheDocument();
     expect(screen.getByText(/Norte/)).toBeInTheDocument();
   });

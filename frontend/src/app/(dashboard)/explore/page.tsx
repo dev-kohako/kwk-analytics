@@ -18,8 +18,16 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Play, Database, Save, Download } from "lucide-react";
+import { Play, Database, Save, Download, ChevronRight } from "lucide-react";
 import { ChipSelect } from "@/components/dashboard/ChipSelect";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useExplore } from "@/hooks/useExplore";
 import { DIMENSIONS, MEASURES } from "@/types/types";
 import { Switch } from "@/components/ui/switch";
@@ -314,84 +322,93 @@ export default function ExplorePage() {
 
       {data?.pivot && (
         <Card className="overflow-hidden shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex flex-wrap items-center gap-2 text-base sm:text-lg">
-              📊 Resultados da Análise
-              <Badge
-                variant="outline"
-                className="border-blue-500 text-blue-500"
-              >
-                {data.pivot.rows.length} linhas
+          <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0 px-6 py-5">
+            <div className="min-w-0 space-y-1">
+              <CardTitle className="text-base font-semibold">
+                Resultado
+              </CardTitle>
+              <CardDescription className="text-sm">
+                {describeAnalysis(
+                  filters.measures,
+                  filters.dimensions ?? [],
+                  { comparing: showComparison }
+                )}
+              </CardDescription>
+            </div>
+
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              <Badge variant="secondary">
+                {data.pivot.rows.length}{" "}
+                {data.pivot.rows.length === 1 ? "resultado" : "resultados"}
               </Badge>
-              {compare && previous && (
-                <Badge variant="secondary">Comparando períodos</Badge>
+              {showComparison && (
+                <Badge variant="outline">Comparando períodos</Badge>
               )}
-            </CardTitle>
-            <CardDescription className="text-sm">
-              Consulta gerada automaticamente pelo motor de pivotagem.
-            </CardDescription>
+            </div>
           </CardHeader>
 
-          <CardContent className="grid gap-4 sm:gap-6 p-4 sm:p-6">
-            <details className="mb-2 sm:mb-4">
-              <summary className="cursor-pointer text-sm text-muted-foreground pb-3">
-                Ver SQL
-              </summary>
-              <pre className="text-xs sm:text-sm bg-muted p-3 sm:p-4 rounded-md w-full wrap-break-word whitespace-pre-wrap">
-                {data.pivot.sql}
-              </pre>
-            </details>
+          <CardContent className="space-y-4 px-6 pb-6 pt-0">
+            {data.pivot.rows.length === 0 && (
+              <div className="rounded-lg border border-dashed py-12 text-center">
+                <p className="text-sm font-medium">
+                  Nenhuma venda encontrada nesse recorte.
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Tente ampliar o período ou remover algum filtro.
+                </p>
+              </div>
+            )}
 
-            <div className="w-full overflow-x-auto rounded-md border">
-              <table className="w-full text-xs sm:text-sm border-collapse">
-                <thead className="sticky top-0 bg-muted/70 backdrop-blur-sm">
-                  <tr className="text-muted-foreground">
+            <div className="w-full overflow-x-auto rounded-lg border">
+              <Table>
+                <TableHeader className="bg-muted/50">
+                  <TableRow className="hover:bg-transparent">
                     {filters.dimensions?.map((dim) => (
-                      <th
+                      <TableHead
                         key={dim}
                         rowSpan={showComparison ? 2 : 1}
-                        className="px-4 py-3 text-left font-medium border-b border-r bg-muted/50"
+                        className="border-r px-4 py-3 text-left align-middle font-medium text-foreground"
                       >
                         {dimensionLabel(dim)}
-                      </th>
+                      </TableHead>
                     ))}
                     {activeMeasures.map((m) => (
-                      <th
+                      <TableHead
                         key={measureKey(m)}
                         colSpan={showComparison ? 3 : 1}
-                        className="px-4 py-3 text-center font-semibold border-b border-r bg-muted/50"
+                        className="border-r px-4 py-3 text-center align-middle font-semibold text-foreground"
                       >
                         {measureLabel(m)}
-                      </th>
+                      </TableHead>
                     ))}
-                  </tr>
+                  </TableRow>
 
                   {showComparison && (
-                    <tr className="bg-muted/30 text-muted-foreground">
+                    <TableRow className="hover:bg-transparent">
                       {activeMeasures.flatMap((m) =>
                         ["Atual", "Anterior", "Δ"].map((label) => (
-                          <th
+                          <TableHead
                             key={`${measureKey(m)}-${label}`}
-                            className="px-4 py-2 border-r text-center font-normal"
+                            className="border-r px-4 py-2 text-center align-middle font-normal"
                           >
                             {label}
-                          </th>
+                          </TableHead>
                         ))
                       )}
-                    </tr>
+                    </TableRow>
                   )}
-                </thead>
+                </TableHeader>
 
-                <tbody>
+                <TableBody>
                   {paginatedMerged.map((row, i) => (
-                    <tr key={i} className="hover:bg-muted/20 transition-colors">
+                    <TableRow key={i}>
                       {filters.dimensions?.map((dim) => (
-                        <td
+                        <TableCell
                           key={dim}
-                          className="px-4 py-3 border-r font-medium whitespace-nowrap"
+                          className="whitespace-nowrap border-r px-4 py-3 font-medium"
                         >
                           {formatDimensionValue(dim, row[dim])}
-                        </td>
+                        </TableCell>
                       ))}
 
                       {activeMeasures.map((m) => {
@@ -405,18 +422,18 @@ export default function ExplorePage() {
 
                         return (
                           <Fragment key={base}>
-                            <td className="px-4 py-3 border-r text-right font-medium tabular-nums">
+                            <TableCell className="border-r px-4 py-3 text-right font-medium tabular-nums">
                               {formatMeasure(curr, m.field)}
-                            </td>
+                            </TableCell>
 
                             {showComparison && (
                               <>
-                                <td className="px-4 py-3 border-r text-right text-muted-foreground tabular-nums">
+                                <TableCell className="border-r px-4 py-3 text-right text-muted-foreground tabular-nums">
                                   {formatMeasure(prev, m.field)}
-                                </td>
-                                <td
+                                </TableCell>
+                                <TableCell
                                   className={cn(
-                                    "px-4 py-3 border-r text-right font-semibold whitespace-nowrap tabular-nums",
+                                    "whitespace-nowrap border-r px-4 py-3 text-right font-semibold tabular-nums",
                                     up && "text-emerald-600 dark:text-emerald-400",
                                     down && "text-red-600 dark:text-red-400"
                                   )}
@@ -424,16 +441,16 @@ export default function ExplorePage() {
                                   {typeof pct === "number"
                                     ? `${up ? "+" : ""}${(pct * 100).toFixed(1)}%`
                                     : "—"}
-                                </td>
+                                </TableCell>
                               </>
                             )}
                           </Fragment>
                         );
                       })}
-                    </tr>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
+                </TableBody>
+              </Table>
             </div>
 
             {totalPages > 1 && (
@@ -463,6 +480,24 @@ export default function ExplorePage() {
                   </PaginationContent>
                 </Pagination>
               </>
+            )}
+
+            {/* A consulta continua acessível, mas como detalhe técnico no rodapé
+                em vez de primeira coisa acima da tabela. Quem analisa dado
+                precisa poder auditar o número; quem não lê SQL não tropeça. */}
+            {data.pivot.rows.length > 0 && (
+              <details className="group border-t pt-4">
+                <summary className="flex cursor-pointer list-none items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+                  <ChevronRight
+                    className="h-4 w-4 transition-transform group-open:rotate-90"
+                    aria-hidden="true"
+                  />
+                  Ver a consulta que gerou esses números
+                </summary>
+                <pre className="mt-3 w-full overflow-x-auto whitespace-pre-wrap break-words rounded-md bg-muted p-4 text-xs">
+                  {data.pivot.sql}
+                </pre>
+              </details>
             )}
           </CardContent>
         </Card>
