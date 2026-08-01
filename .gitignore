@@ -7,3 +7,7 @@ db_data/
 .env
 .env.*
 !.env.example
+
+# O lockfile da raiz faz o Next inferir a raiz do monorepo como workspace
+# root e quebra o build do frontend na Vercel. Cada modulo tem o seu.
+/bun.lock
