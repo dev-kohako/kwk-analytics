@@ -1,212 +1,316 @@
-# KWK Analytics (Frontend)
+# KWK Analytics
 
-> **"Power BI para Restaurantes" — Uma plataforma de analytics customizável para donos de restaurantes explorarem seus dados operacionais.**
+> **"Power BI para restaurantes"** — plataforma de analytics no-code onde o gestor monta suas próprias análises, salva dashboards e recebe insights automáticos sobre a operação.
 
-## 🚀 Visão Geral
+<p align="left">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-16-000?logo=nextdotjs&logoColor=white">
+  <img alt="React" src="https://img.shields.io/badge/React-19-149ECA?logo=react&logoColor=white">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white">
+  <img alt="GraphQL" src="https://img.shields.io/badge/GraphQL-Apollo-E10098?logo=graphql&logoColor=white">
+  <img alt="Prisma" src="https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma&logoColor=white">
+  <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
+</p>
 
-Maria é dona de três restaurantes e vende por canais como iFood, Rappi, WhatsApp e app próprio.  
-Ela tem os dados — mas não tem a ferramenta para transformá-los em decisões.
-
-O **KWK Analytics** é a resposta: uma plataforma **no-code**, **personalizável** e **rápida** para que gestores do food service possam **criar dashboards**, **explorar dados** e **gerar insights** em segundos.
+🔗 **Demo:** [kwk-analytics.vercel.app](https://kwk-analytics.vercel.app/) · **API:** GraphQL na raiz (`/`)
 
 ---
 
-## 🎯 Objetivos Atendidos
+## 🚀 O problema
 
-✅ Criar dashboards personalizados sem código (Pivot Builder)  
-✅ Visualizar métricas que importam (KPIs de operação e vendas)  
-✅ Comparar períodos e identificar tendências  
-✅ Compartilhar análises com a equipe  
-✅ UX responsiva, acessível e fluida  
+Maria é dona de três restaurantes e vende por iFood, Rappi, WhatsApp e app próprio.
+Ela **tem** os dados — o que falta é a ferramenta para transformá-los em decisão.
+
+O KWK Analytics resolve isso com três pilares:
+
+| Pilar | O que entrega |
+|---|---|
+| **Explorar** | Um Pivot Builder: escolha dimensões, métricas, filtros e período — sem escrever SQL |
+| **Dashboards** | Salve qualquer análise como dashboard e reabra depois com gráficos e KPIs |
+| **Insights** | Leituras automáticas do período (canal líder, produto destaque, tempo de entrega) |
+
+---
+
+## ✨ Funcionalidades
+
+### 1. Explorar (Pivot Builder) — `/explore`
+- Dimensões disponíveis: `store_id`, `channel`, `product_id`, `customer_id`, `sold_date`, `dow`, `hour_of_day`, `delivery_region`
+- Métricas: `sum`, `avg`, `count`, `count_distinct` sobre `revenue`, `quantity`, `sale_id`, `customer_id`, `delivery_minutes`
+- Filtros dinâmicos com autocomplete de valores reais (`pivotFieldValues`)
+- Intervalo de datas + **comparação com o período anterior** (Δ e %)
+- Paginação server-side e **exportação para CSV**
+- **Salvar como dashboard** em um clique
+- A query exibe o **SQL gerado** — transparência total sobre o que foi executado
+
+### 2. Dashboards — `/dashboard` e `/dashboard/[id]`
+- Lista de dashboards salvos (persistidos no Postgres como `config` JSON)
+- Gráficos de barra, linha e pizza (Recharts) + KPI cards
+- Análises prontas: **Top Produtos**, **Tendência de entrega por região**, **Lost but Loyal** (clientes fiéis que pararam de comprar)
+
+### 3. Insights automáticos — `/insights`
+Duas camadas sobre os últimos 30 dias contra os 30 anteriores:
+
+- **Determinística (sempre presente):** variação de receita, pedidos e ticket médio; tendência por regressão linear; dias fora do padrão por z-score; concentração de Pareto; sazonalidade por dia da semana; canal em retração
+- **IA (opcional):** com uma chave de provedor gratuito configurada, um modelo lê o mesmo resumo agregado e acrescenta leituras marcadas com `generatedBy: ai`
+- Cada insight vem tipado — `severity`, `metric`, `value`, `previousValue`, `deltaPercent`, `entity` e `suggestion` — e não apenas como frase solta
+- Sinal sem lastro é omitido, não preenchido com zero
+
+### 4. UX
+- Mobile-first, dark/light mode (`next-themes`), skeleton loaders, estados de vazio/erro
+- Microinterações com Motion, feedback com Sonner, componentes acessíveis (Radix/shadcn)
 
 ---
 
 ## 🏗️ Arquitetura
 
-O projeto é composto por **dois módulos principais**:
+Monorepo com dois módulos independentes:
 
-| Módulo | Stack | Descrição |
-|--------|--------|-----------|
-| **Frontend** | Next.js 15, React 18, TypeScript, Tailwind, Shadcn/UI, Zustand, Apollo Client | Interface de exploração e dashboards |
-| **Backend** | Node.js, Apollo Server, Express, Prisma, PostgreSQL | API GraphQL para pivotagem, insights e dashboards |
+```
+┌──────────────────────┐      GraphQL       ┌──────────────────────┐      SQL       ┌───────────────┐
+│  frontend (Next 16)  │ ──────────────────▶│  backend (Apollo 3)  │ ──────────────▶│  PostgreSQL   │
+│  Apollo Client 4     │                    │  Zod · Prisma 6      │                │ mv_sales_fact │
+│  Zustand · shadcn/ui │◀────────────────── │  cache memória+Redis │◀────────────── │  + índices    │
+└──────────────────────┘   rows + sql       └──────────┬───────────┘                └───────────────┘
+                                                       │ resumo agregado (sem PII)
+                                                       ▼
+                                            ┌──────────────────────┐
+                                            │  LLM opcional        │
+                                            │  Groq · OpenRouter   │
+                                            │  Ollama · DeepSeek   │
+                                            └──────────────────────┘
+```
 
-### 📊 Fluxo de dados
-1. O usuário define **dimensões, métricas e filtros** via Pivot Builder.
-2. O frontend monta o **input dinâmico GraphQL** e envia ao resolver `pivot`.
-3. O backend traduz o input em SQL otimizado (com índices e materialized views).
-4. Os resultados são formatados, comparados (período anterior) e retornados.
-5. O frontend exibe a análise em tabela responsiva, com export e opção de dashboard.
-
----
-
-## ⚙️ Tecnologias Principais
-
-### 🧩 Frontend
-- **Next.js 15 (App Router)**
-- **React 18 + TypeScript**
-- **Apollo Client (GraphQL)**
-- **Zustand** para estado global (filtros e dashboards)
-- **Shadcn/UI + TailwindCSS** para UI moderna e acessível
-- **Framer Motion** para microinterações suaves
-- **Sonner** para feedbacks
-- **Lucide Icons** para consistência visual
-
-### 🧠 Backend
-- **Apollo Server + Express**
-- **Prisma ORM + PostgreSQL**
-- **Zod** para validação de inputs
-- **JWT** e **bcrypt** para autenticação
-- **faker + scripts de seed** (500.000 vendas simuladas)
-- **Materialized Views e índices SQL** para performance
+### Fluxo de uma análise
+1. O usuário monta dimensões, métricas e filtros no Pivot Builder.
+2. O frontend envia um `PivotInput` dinâmico para o resolver `pivot`.
+3. O backend valida com **Zod** e passa por um **allow-list** de campos (`src/lib/sql.ts`) — nenhum identificador vem do usuário sem checagem, o que fecha a porta para SQL injection.
+4. A query roda sobre a materialized view `mv_sales_fact`, que já resolve os joins pesados (vendas × produtos × lojas × canais × clientes).
+5. O resultado volta como `{ rows, sql }`, é comparado com o período anterior e renderizado.
 
 ---
 
-## 🧩 Features Implementadas
+## ⚙️ Stack
 
-### 1. Pivot Builder (Explorar)
-- Escolha de **dimensões**, **métricas**, **filtros** e **intervalo de datas**
-- Comparação entre períodos (`compare: true`)
-- Exportação de resultados para **CSV**
-- Salvamento como **Dashboard customizado**
-- Interface **responsiva**, **acessível** e **fluida**
+### Frontend (`/frontend`)
+| Ferramenta | Uso |
+|---|---|
+| **Next.js 16 (App Router)** + **React 19** | Rotas, layouts e Server Components |
+| **TypeScript 5** | Tipagem ponta a ponta |
+| **Apollo Client 4** | Comunicação GraphQL e cache normalizado |
+| **GraphQL Codegen** | Tipos gerados a partir do schema do backend |
+| **Zustand 5** | Estado global (filtros, dashboards) |
+| **Tailwind CSS 4 + shadcn/ui (Radix)** | UI acessível e consistente |
+| **Recharts 3** | Gráficos |
+| **Motion**, **Sonner**, **Lucide** | Animações, toasts e ícones |
+| **Jest + Testing Library** | Testes de UI e hooks |
 
-### 2. Dashboards
-- Visualização de múltiplos gráficos e métricas
-- Cards de **Top Produtos**, **Tendência por Região**, **Clientes Perdidos**
-- KPIs de operação: **Receita**, **Pedidos**, **Ticket médio**, **Tempo médio de entrega**
-- Comparativo entre períodos (Δ e %)
-
-### 3. Insights Automáticos (IA)
-- Geração de insights textuais (“Seus produtos mais vendidos caíram 12% no iFood”)
-- Sugestões de filtros e dimensões relevantes
-
-### 4. Compartilhamento
-- Geração de **link público read-only** via token
-- Visualização segura sem autenticação
+### Backend (`/backend`)
+| Ferramenta | Uso |
+|---|---|
+| **Apollo Server 3** (standalone) | Servidor GraphQL |
+| **Prisma 6** | Client tipado e acesso ao Postgres |
+| **PostgreSQL 16** | Banco relacional + materialized view |
+| **Zod** | Validação dos inputs GraphQL e da saída do modelo |
+| **Redis** (opcional) | Cache L2 compartilhado entre réplicas |
+| **LLM OpenAI-compatible** (opcional) | Camada de IA sobre os insights — Groq, OpenRouter, Ollama ou DeepSeek |
+| **Jest** | Testes unitários e de integração |
+| **Docker Compose** | Backend + banco em um comando |
 
 ---
 
-## ⚡ Performance
+## 📡 API GraphQL
 
-### 🚀 Banco otimizado
-- Índices em colunas `channel`, `store_id`, `product_id`, `sold_date`
-- Materialized View `mv_sales_day` com pre-agregação por dia
-- Queries < **800ms** em dataset de 500k vendas
+| Operação | Descrição |
+|---|---|
+| `pivot(input)` | Consulta pivot dinâmica → `{ rows, sql }` |
+| `pivotFieldValues(input)` | Valores distintos de um campo (autocomplete de filtros) |
+| `topProducts(input)` | Top produtos com faturamento atual, anterior e Δ% |
+| `deliveryRegionTrend(input)` | Variação do tempo médio de entrega por região |
+| `lostButLoyal` | Clientes recorrentes que pararam de comprar |
+| `autoInsights` | Insights textuais automáticos |
+| `dashboards` / `dashboard(id)` | Dashboards salvos |
+| `saveDashboard(input)` *(mutation)* | Persiste um dashboard |
 
-### 🧠 Cache (opcional)
-- Cache Redis com TTL curto para consultas repetidas
-- Estratégia por chave de filtro (hash JSON do input)
+<details>
+<summary>Exemplo de query pivot</summary>
+
+```graphql
+query {
+  pivot(
+    input: {
+      dimensions: ["channel"]
+      measures: [
+        { field: "revenue", fn: sum, alias: "faturamento" }
+        { field: "sale_id", fn: count, alias: "pedidos" }
+      ]
+      dateRange: { from: "2025-09-01", to: "2025-10-31" }
+      limit: 10
+    }
+  ) {
+    rows
+    sql
+  }
+}
+```
+</details>
+
+---
+
+## 📦 Como rodar
+
+### Pré-requisitos
+- **Bun 1.x** ou **Node 20+**
+- **PostgreSQL 16** (ou Docker)
+
+### 1. Clone
+```bash
+git clone https://github.com/dev-kohako/kwk-analytics.git
+cd kwk-analytics
+```
+
+### 2. Banco + backend via Docker
+```bash
+cp backend/.env.example backend/.env   # preencha DATABASE_URL
+docker compose up --build
+```
+> Sobe `nola-db` (Postgres 16) e `nola-backend` em **http://localhost:4000/**.
+
+### 3. Prepare os dados
+Carregue o dataset do desafio no banco e **crie a materialized view `mv_sales_fact`** — todas as análises leem dela:
+
+```bash
+psql "$DATABASE_URL" -f backend/sql/mv_sales_fact.sql
+```
+
+> Detalhes e limitações em [backend/README.md](backend/README.md#-performance-e-escalabilidade).
+
+### 4. Frontend
+```bash
+cd frontend
+bun install
+cp .env.example .env.local
+bun dev
+```
+> Disponível em **http://localhost:3000**.
+
+<details>
+<summary>Rodando o backend sem Docker</summary>
+
+```bash
+cd backend
+bun install
+bunx prisma generate
+bun run dev
+```
+</details>
+
+### Variáveis de ambiente
+
+**`backend/.env`**
+```env
+PORT=4000
+DATABASE_URL=postgresql://challenge:challenge_2024@localhost:5432/challenge_db
+PRISMA_CLIENT_ENGINE_TYPE=binary
+
+# Opcionais — a API sobe e responde sem nenhum dos dois.
+REDIS_URL=redis://localhost:6379
+AI_API_KEY=
+AI_BASE_URL=https://api.groq.com/openai
+AI_MODEL=llama-3.3-70b-versatile
+```
+
+> Sem `REDIS_URL` o cache é in-memory. Sem `AI_API_KEY` os insights são apenas determinísticos. Combinações prontas de provedores gratuitos estão em [backend/.env.example](backend/.env.example).
+
+**`frontend/.env.local`**
+```env
+NEXT_PUBLIC_API_URL=http://localhost:4000/
+```
 
 ---
 
 ## 🧪 Testes
 
-### Backend (Jest)
-- Testes de integração para resolvers `pivot`, `getTopProducts`, `comparePeriods`
-- Mock de banco via SQLite in-memory
+```bash
+cd frontend && bun test          # páginas, hooks, store e queries
+cd backend  && bunx jest         # controllers: pivot, topProducts, insights, cache…
+```
 
-### Frontend (React Testing Library)
-- Testes de UI para:
-  - `FilterBuilder` (adicionar/remover filtros)
-  - `ExplorePage` (executar análise e renderizar tabela)
-  - `DashboardChart` (renderização condicional e props)
+Os testes do backend são de **integração** e esperam um banco populado com `mv_sales_fact`.
 
 ---
 
-## 🌈 UX e Acessibilidade
+## ⚡ Performance
 
-- Interface mobile-first e sem scroll duplo
-- Teclas de navegação e foco visível
-- `aria-label` e `aria-sort` em colunas
-- Skeleton loaders e mensagens de estado (“Sem dados”, “Executando…”)
-- Modo escuro/claro suportado
-
----
-
-## 📦 Setup e Execução
-
-### 🔹 Pré-requisitos
-- Node 20+ ou Bun
-- PostgreSQL 15+
-- Docker (opcional)
-
-### 🔹 Clone e instale
-<pre>
-git clone https://github.com/josephkwk/nola-challenge.git
-cd nola-challenge/frontend
-bun install
-</pre>
-
-### 🔹 Configure o ambiente
-Crie o arquivo **.env.local**:
-<pre>
-NEXT_PUBLIC_API_URL=http://localhost:4000/graphql
-</pre>
-
-### 🔹 Rode o servidor
-<pre>
-bun dev
-</pre>
-
-> O app estará disponível em http://localhost:3000
+- **Materialized view `mv_sales_fact`** pré-resolve os joins entre vendas, produtos, lojas, canais e clientes — o custo do join sai do caminho da requisição.
+- **Índices** em `sold_date`, `channel` e `product_id`, que são os cortes mais frequentes.
+- **Cache in-memory com TTL** (`src/utils/cache.ts`) para repetições da mesma consulta, com limpeza periódica.
+- **Agregações em paralelo** via `prisma.$transaction` nos insights.
+- Paginação server-side no `pivot` — o frontend nunca recebe o dataset inteiro.
 
 ---
 
-## 🧠 Decisões Arquiteturais
+## 🧠 Decisões arquiteturais
 
-| Decisão | Justificativa |
-|----------|----------------|
-| **GraphQL + Apollo** | Permite queries dinâmicas (pivot), evita endpoints REST fixos |
-| **Zustand > Redux** | Menor boilerplate e ideal para estados simples |
-| **Shadcn/UI** | Componentes acessíveis e estilização consistente com Tailwind |
-| **Materialized Views** | Aceleração de consultas agregadas (6x mais rápido) |
-| **Separação de responsabilidades** | Hooks (queries), componentes (UI), tipos isolados |
-| **Arquitetura declarativa** | Exploração no frontend, lógica de agregação no backend |
+| Decisão | Por quê |
+|---|---|
+| **GraphQL em vez de REST** | O pivot é dinâmico por natureza; endpoints fixos não cobrem a combinatória de dimensões × métricas × filtros |
+| **Allow-list de identificadores SQL** | Query dinâmica sem abrir brecha de injection; campo fora da lista é rejeitado com 400 |
+| **Materialized view** | Mover o custo dos joins para fora do request foi o ganho mais barato e mais efetivo |
+| **Zustand em vez de Redux** | Estado global pequeno (filtros e dashboards); Redux traria boilerplate sem retorno |
+| **shadcn/ui em vez de MUI/Chakra** | Componentes acessíveis, sem bundle extra e com controle total do estilo |
+| **Retornar o `sql` na resposta** | Quem analisa dado precisa confiar no número — expor a query é a forma mais direta |
+| **Dashboard como JSON** | `config` em JSONB deixa o formato do dashboard evoluir sem migração |
+
+ADRs completos: [frontend/README.md](frontend/README.md) e [backend/README.md](backend/README.md#-decisões-de-arquitetura-adr).
 
 ---
 
-## 🧱 Estrutura de Pastas
+## 🧱 Estrutura
 
-<pre>
-src/
-├── app/
-│   ├── page.tsx
-│   ├── explore/
-│   │   └── page.tsx
-│   ├── dashboards/
-│   │   └── [id]/page.tsx
-├── components/
-│   ├── dashboard/
-│   ├── charts/
-│   ├── ui/
-├── hooks/
-│   ├── useExplore.ts
-│   ├── useInsights.ts
-│   └── useDashboardById.ts
-├── queries/
-│   ├── explore.queries.ts
-│   └── insights.queries.ts
-├── store/
-│   └── useDashboardStore.ts
-├── types/
-│   └── types.ts
-└── lib/
-    └── utils.ts
-</pre>
+```
+.
+├── backend/
+│   ├── prisma/schema.prisma       # schema introspectado do banco do desafio
+│   ├── src/
+│   │   ├── controllers/analytics/ # pivot, topProducts, autoInsights, lostButLoyal…
+│   │   ├── graphql/               # schema.ts · resolvers.ts · context.ts
+│   │   ├── lib/                   # prisma.ts · sql.ts (builder + allow-list)
+│   │   ├── utils/                 # cache, erros, wrapper de resolver
+│   │   ├── validation/            # schemas Zod
+│   │   └── index.ts
+│   └── tests/
+├── frontend/
+│   └── src/
+│       ├── app/
+│       │   ├── (dashboard)/dashboard/[id]/
+│       │   ├── (dashboard)/explore/
+│       │   └── (dashboard)/insights/
+│       ├── components/            # charts/ · dashboard/ · ui/
+│       ├── hooks/                 # useExplore, useInsights, useDashboardById…
+│       ├── queries/ · store/ · types/ · validation/
+│       └── lib/apollo/
+└── docker-compose.yml
+```
+
+---
+
+## 🗺️ Status e próximos passos
+
+Entregue: pivot dinâmico, dashboards persistidos, insights determinísticos com camada opcional de IA, cache em duas camadas, comparação de períodos, export CSV, dark mode e testes.
+
+Fora do escopo desta versão:
+- **Autenticação / multi-tenant** — a API é aberta, pensada para o ambiente de demonstração
+- **Compartilhamento por link público**
+- **Refresh automático da materialized view**
+- **Tempo de entrega real** — o dataset do desafio não traz timestamp de entrega, então `delivery_minutes` é um placeholder que retorna zero ([detalhes](backend/README.md#-performance-e-escalabilidade))
 
 ---
 
 ## 👤 Autor
 
-**Joseph Kawe (KWK Tech)**  
-Full-Stack Engineer • Founder at KWK Technologies  
-📧 joseph@kwktech.dev  
-🌐 [https://kwktech.dev](https://kwktech.dev)  
-💼 [LinkedIn](https://www.linkedin.com/in/josephkawe)
-
----
+**Joseph Kawe** — Full-Stack Engineer · KWK Tech
+📧 joseph@kwktech.dev · 🌐 [kwktech.dev](https://kwktech.dev) · 💼 [LinkedIn](https://www.linkedin.com/in/josephkawe) · 🐙 [@dev-kohako](https://github.com/dev-kohako)
 
 ## 📜 Licença
 
-MIT © 2025 — KWK Tech.  
-Uso educacional e demonstrativo.
+MIT © 2025 — KWK Tech. Uso educacional e demonstrativo.
