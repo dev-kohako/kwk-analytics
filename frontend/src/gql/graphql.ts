@@ -20,8 +20,26 @@ export type Scalars = {
 
 export type AutoInsight = {
   __typename?: 'AutoInsight';
+  /** 0 a 1. Nos insights de regra, reflete a força estatística do sinal. */
+  confidence?: Maybe<Scalars['Float']['output']>;
+  deltaPercent?: Maybe<Scalars['Float']['output']>;
+  /** Dimensão analisada, ex.: channel, product_name, dow. */
+  dimension?: Maybe<Scalars['String']['output']>;
+  direction?: Maybe<InsightDirection>;
+  /** Item concreto dentro da dimensão, ex.: iFood. */
+  entity?: Maybe<Scalars['String']['output']>;
+  generatedBy: InsightSource;
+  id: Scalars['ID']['output'];
+  /** Texto puro, sem HTML — o cliente deve renderizar como texto. */
   message: Scalars['String']['output'];
+  /** Nome da métrica analisada, ex.: revenue, average_ticket. */
+  metric?: Maybe<Scalars['String']['output']>;
+  previousValue?: Maybe<Scalars['Float']['output']>;
+  severity: InsightSeverity;
+  suggestion?: Maybe<Scalars['String']['output']>;
+  title: Scalars['String']['output'];
   type?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['Float']['output']>;
 };
 
 export type Dashboard = {
@@ -55,6 +73,25 @@ export type FilterInput = {
   op: Scalars['String']['input'];
   value?: InputMaybe<Scalars['JSON']['input']>;
 };
+
+export enum InsightDirection {
+  Down = 'down',
+  Flat = 'flat',
+  Up = 'up'
+}
+
+export enum InsightSeverity {
+  Critical = 'critical',
+  Info = 'info',
+  Positive = 'positive',
+  Warning = 'warning'
+}
+
+/** Origem do insight: regra determinística sobre os agregados ou modelo de linguagem. */
+export enum InsightSource {
+  Ai = 'ai',
+  Rule = 'rule'
+}
 
 export type LostCustomer = {
   __typename?: 'LostCustomer';
@@ -203,7 +240,7 @@ export type GetPivotFieldValuesQuery = { __typename?: 'Query', pivotFieldValues:
 export type GetAutoInsightsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetAutoInsightsQuery = { __typename?: 'Query', autoInsights: Array<{ __typename?: 'AutoInsight', message: string }> };
+export type GetAutoInsightsQuery = { __typename?: 'Query', autoInsights: Array<{ __typename?: 'AutoInsight', id: string, title: string, message: string, type?: string | null, severity: InsightSeverity, metric?: string | null, value?: number | null, previousValue?: number | null, deltaPercent?: number | null, direction?: InsightDirection | null, dimension?: string | null, entity?: string | null, suggestion?: string | null, generatedBy: InsightSource, confidence?: number | null }> };
 
 export type GetTopProductsQueryVariables = Exact<{
   input: TopProductsInput;
@@ -236,7 +273,7 @@ export const GetDashboardByIdDocument = {"kind":"Document","definitions":[{"kind
 export const GetDashboardsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDashboards"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"dashboards"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"created_at"}}]}}]}}]} as unknown as DocumentNode<GetDashboardsQuery, GetDashboardsQueryVariables>;
 export const PivotDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Pivot"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PivotInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pivot"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"sql"}},{"kind":"Field","name":{"kind":"Name","value":"rows"}}]}}]}}]} as unknown as DocumentNode<PivotQuery, PivotQueryVariables>;
 export const GetPivotFieldValuesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetPivotFieldValues"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PivotFieldValuesInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"pivotFieldValues"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<GetPivotFieldValuesQuery, GetPivotFieldValuesQueryVariables>;
-export const GetAutoInsightsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAutoInsights"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"autoInsights"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]} as unknown as DocumentNode<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>;
+export const GetAutoInsightsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAutoInsights"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"autoInsights"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"severity"}},{"kind":"Field","name":{"kind":"Name","value":"metric"}},{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"previousValue"}},{"kind":"Field","name":{"kind":"Name","value":"deltaPercent"}},{"kind":"Field","name":{"kind":"Name","value":"direction"}},{"kind":"Field","name":{"kind":"Name","value":"dimension"}},{"kind":"Field","name":{"kind":"Name","value":"entity"}},{"kind":"Field","name":{"kind":"Name","value":"suggestion"}},{"kind":"Field","name":{"kind":"Name","value":"generatedBy"}},{"kind":"Field","name":{"kind":"Name","value":"confidence"}}]}}]}}]} as unknown as DocumentNode<GetAutoInsightsQuery, GetAutoInsightsQueryVariables>;
 export const GetTopProductsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTopProducts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TopProductsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"topProducts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"product_id"}},{"kind":"Field","name":{"kind":"Name","value":"total_itens"}},{"kind":"Field","name":{"kind":"Name","value":"faturamento"}},{"kind":"Field","name":{"kind":"Name","value":"faturamento_prev"}},{"kind":"Field","name":{"kind":"Name","value":"delta_percent"}}]}}]}}]} as unknown as DocumentNode<GetTopProductsQuery, GetTopProductsQueryVariables>;
 export const GetDeliveryRegionTrendDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDeliveryRegionTrend"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"DeliveryRegionTrendInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deliveryRegionTrend"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"delivery_region"}},{"kind":"Field","name":{"kind":"Name","value":"avg_prev"}},{"kind":"Field","name":{"kind":"Name","value":"avg_cur"}},{"kind":"Field","name":{"kind":"Name","value":"delta_min"}},{"kind":"Field","name":{"kind":"Name","value":"delta_percent"}}]}}]}}]} as unknown as DocumentNode<GetDeliveryRegionTrendQuery, GetDeliveryRegionTrendQueryVariables>;
 export const GetLostButLoyalDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetLostButLoyal"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"lostButLoyal"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"customer_id"}},{"kind":"Field","name":{"kind":"Name","value":"n_orders"}},{"kind":"Field","name":{"kind":"Name","value":"last_date"}}]}}]}}]} as unknown as DocumentNode<GetLostButLoyalQuery, GetLostButLoyalQueryVariables>;
