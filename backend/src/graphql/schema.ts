@@ -159,12 +159,13 @@ export const typeDefs = gql`
     trialEndsAt: String
   }
 
-  "Consumo de uma métrica no período. Limite nulo significa ilimitado."
-  type Consumo {
-    metric: String!
-    used: Int!
-    limit: Int
-    remaining: Int
+
+
+  type SessaoAtiva {
+    id: ID!
+    userAgent: String
+    createdAt: String!
+    expiresAt: String!
   }
 
   type Conta {
@@ -197,6 +198,8 @@ export const typeDefs = gql`
   type Query {
     "Conta autenticada, ou null quando não há token válido."
     me: Conta
+    "Sessões abertas da conta, para reconhecer acesso que não é seu."
+    activeSessions: [SessaoAtiva!]!
     dashboards: [Dashboard!]!
     dashboard(id: Int!): Dashboard
     deliveryRegionTrend(
@@ -217,6 +220,8 @@ export const typeDefs = gql`
     logout(refreshToken: String!): Boolean!
     "Encerra todas as sessões da conta. Exige estar autenticado."
     logoutAll: Int!
+    changePassword(currentPassword: String!, newPassword: String!): Boolean!
+    updateProfile(name: String!): Boolean!
     "Envia o link de redefinição. Responde true mesmo se o e-mail não existir."
     requestPasswordReset(email: String!): Boolean!
     resetPassword(token: String!, password: String!): Boolean!

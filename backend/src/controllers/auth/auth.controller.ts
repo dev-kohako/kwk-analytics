@@ -177,3 +177,61 @@ export async function currentUser(userId: number) {
       : null,
   };
 }
+
+/** Sessões abertas, para a pessoa reconhecer acesso que não é dela. */
+export async function activeSessions(userId: number) {
+  const linhas = await prisma.user_session.findMany({
+    where: { user_id: userId, revoked_at: null },
+    orderBy: { created_at: "desc" },
+    select: { id: true, user_agent: true, created_at: true, expires_at: true },
+  });
+
+  const agora = new Date();
+
+  return linhas
+    .filter((s) => s.expires_at > agora)
+    .map((s) => ({
+      id: s.id,
+      userAgent: s.user_agent,
+      createdAt: s.created_at.toISOString(),
+      expiresAt: s.expires_at.toISOString(),
+    }));
+}
+
+/**
+ * Troca de senha com a senha atual.
+ *
+ * Exigir a atual impede que alguém com a sessão aberta — computador
+ * destravado, token roubado — assuma a conta trocando a senha.
+ */
+export async function changePassword(
+  userId: number,
+  atual: string,
+  nova: string
+): Promise<boolean> {
+  const user = await prisma.app_user.findUnique({ where: { id: userId } });
+  if (!user) throw new AppError("Conta não encontrada.", 404);
+
+  const ok = await verifyPassword(atual, user.password_hash);
+  if (!ok) throw new AppError("A senha atual não confere.", 401);
+
+  await prisma.app_user.update({
+    where: { id: userId },
+    data: { password_hash: await hashPassword(nova), updated_at: new Date() },
+  });
+
+  return true;
+}
+
+/** Atualiza o nome. E-mail não muda por aqui: exigiria reverificação. */
+export async function updateProfile(
+  userId: number,
+  name: string
+): Promise<boolean> {
+  await prisma.app_user.update({
+    where: { id: userId },
+    data: { name: name.trim(), updated_at: new Date() },
+  });
+
+  return true;
+}

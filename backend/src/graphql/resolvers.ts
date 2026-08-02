@@ -24,12 +24,15 @@ import {
 } from "../validation/analytics.zod";
 import { AppError } from "../utils/errors";
 import {
+  activeSessions,
+  changePassword,
   currentUser,
   login,
   logout,
   logoutAll,
   refreshSession,
   register,
+  updateProfile,
 } from "../controllers/auth/auth.controller";
 import {
   requestPasswordReset,
@@ -39,6 +42,10 @@ import {
   RequestResetInput as RequestResetSchema,
   ResetPasswordInput as ResetPasswordSchema,
 } from "../validation/password.zod";
+import {
+  ChangePasswordInput as ChangePasswordSchema,
+  UpdateProfileInput as UpdateProfileSchema,
+} from "../validation/profile.zod";
 import {
   LoginInput as LoginSchema,
   RefreshInput as RefreshSchema,
@@ -107,6 +114,11 @@ const mapaBase = {
   Query: {
     me: wrapResolver(async (_: unknown, __: unknown, ctx: GraphQLContext) =>
       ctx?.userId ? currentUser(ctx.userId) : null
+    ),
+
+    activeSessions: wrapResolver(
+      async (_: unknown, __: unknown, ctx: GraphQLContext) =>
+        activeSessions(exigirConta(ctx))
     ),
 
     dashboards: wrapResolver(async (_: unknown, __: unknown, ctx: GraphQLContext) => {
@@ -221,6 +233,20 @@ const mapaBase = {
     logoutAll: wrapResolver(
       async (_: unknown, __: unknown, ctx: GraphQLContext) =>
         logoutAll(exigirConta(ctx))
+    ),
+
+    changePassword: wrapResolver(
+      async (_: unknown, args: any, ctx: GraphQLContext) => {
+        const { currentPassword, newPassword } = ChangePasswordSchema.parse(args);
+        return changePassword(exigirConta(ctx), currentPassword, newPassword);
+      }
+    ),
+
+    updateProfile: wrapResolver(
+      async (_: unknown, args: any, ctx: GraphQLContext) => {
+        const { name } = UpdateProfileSchema.parse(args);
+        return updateProfile(exigirConta(ctx), name);
+      }
     ),
 
     requestPasswordReset: wrapResolver(async (_: unknown, args: unknown) => {
