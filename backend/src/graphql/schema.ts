@@ -201,6 +201,9 @@ export const typeDefs = gql`
     logout(refreshToken: String!): Boolean!
     "Encerra todas as sessões da conta. Exige estar autenticado."
     logoutAll: Int!
+    "Envia o link de redefinição. Responde true mesmo se o e-mail não existir."
+    requestPasswordReset(email: String!): Boolean!
+    resetPassword(token: String!, password: String!): Boolean!
     saveDashboard(input: SaveDashboardInput!): Dashboard
   }
 `;

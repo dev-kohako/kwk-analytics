@@ -32,6 +32,14 @@ import {
   register,
 } from "../controllers/auth/auth.controller";
 import {
+  requestPasswordReset,
+  resetPassword,
+} from "../controllers/auth/password.controller";
+import {
+  RequestResetInput as RequestResetSchema,
+  ResetPasswordInput as ResetPasswordSchema,
+} from "../validation/password.zod";
+import {
   LoginInput as LoginSchema,
   RefreshInput as RefreshSchema,
   RegisterInput as RegisterSchema,
@@ -200,6 +208,16 @@ export const resolvers = {
       async (_: unknown, __: unknown, ctx: GraphQLContext) =>
         logoutAll(exigirConta(ctx))
     ),
+
+    requestPasswordReset: wrapResolver(async (_: unknown, args: unknown) => {
+      const { email } = RequestResetSchema.parse(args);
+      return requestPasswordReset(email);
+    }),
+
+    resetPassword: wrapResolver(async (_: unknown, args: unknown) => {
+      const { token, password } = ResetPasswordSchema.parse(args);
+      return resetPassword(token, password);
+    }),
 
     saveDashboard: wrapResolver(
       async (_: unknown, { input }: { input: SaveDashboardInput }) => {
