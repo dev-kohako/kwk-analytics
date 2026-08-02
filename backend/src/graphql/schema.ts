@@ -145,7 +145,42 @@ export const typeDefs = gql`
     sql: String!
   }
 
+  type PlanoAtual {
+    code: String!
+    name: String!
+    status: String!
+    trialEndsAt: String
+  }
+
+  type Conta {
+    id: ID!
+    name: String!
+    email: String!
+    createdAt: String
+    plan: PlanoAtual
+  }
+
+  "Tokens da sessão. O refresh é revogável; o de acesso dura 15 minutos."
+  type Sessao {
+    accessToken: String!
+    refreshToken: String!
+    user: Conta!
+  }
+
+  input RegisterInput {
+    name: String!
+    email: String!
+    password: String!
+  }
+
+  input LoginInput {
+    email: String!
+    password: String!
+  }
+
   type Query {
+    "Conta autenticada, ou null quando não há token válido."
+    me: Conta
     dashboards: [Dashboard!]!
     dashboard(id: Int!): Dashboard
     deliveryRegionTrend(
@@ -159,6 +194,13 @@ export const typeDefs = gql`
   }
 
   type Mutation {
+    register(input: RegisterInput!): Sessao!
+    login(input: LoginInput!): Sessao!
+    "Troca o refresh por um novo token de acesso."
+    refreshSession(refreshToken: String!): String!
+    logout(refreshToken: String!): Boolean!
+    "Encerra todas as sessões da conta. Exige estar autenticado."
+    logoutAll: Int!
     saveDashboard(input: SaveDashboardInput!): Dashboard
   }
 `;

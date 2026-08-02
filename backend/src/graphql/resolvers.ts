@@ -23,6 +23,26 @@ import {
   PivotFieldInput as PivotFieldSchema,
 } from "../validation/analytics.zod";
 import { AppError } from "../utils/errors";
+import {
+  currentUser,
+  login,
+  logout,
+  logoutAll,
+  refreshSession,
+  register,
+} from "../controllers/auth/auth.controller";
+import {
+  LoginInput as LoginSchema,
+  RefreshInput as RefreshSchema,
+  RegisterInput as RegisterSchema,
+} from "../validation/auth.zod";
+import type { GraphQLContext } from "./context";
+
+/** Recusa o acesso quando não há sessão — usado pelos resolvers protegidos. */
+const exigirConta = (ctx: GraphQLContext): number => {
+  if (!ctx?.userId) throw new AppError("Faça login para continuar.", 401);
+  return ctx.userId;
+};
 
 type SaveDashboardInput = z.infer<typeof SaveDashboardSchema>;
 type DeliveryRegionTrendInput = z.infer<typeof DeliveryRegionTrendSchema>;
@@ -72,6 +92,10 @@ export const resolvers = {
   JSON: JSONScalar,
 
   Query: {
+    me: wrapResolver(async (_: unknown, __: unknown, ctx: GraphQLContext) =>
+      ctx?.userId ? currentUser(ctx.userId) : null
+    ),
+
     dashboards: wrapResolver(async () =>
       cacheWrap("dashboards", CACHE_TTLS.DASHBOARDS, () => getDashboards())
     ),
@@ -151,6 +175,32 @@ export const resolvers = {
   },
 
   Mutation: {
+    register: wrapResolver(
+      async (_: unknown, { input }: { input: unknown }, ctx: GraphQLContext) =>
+        register({ ...RegisterSchema.parse(input), userAgent: ctx?.userAgent })
+    ),
+
+    login: wrapResolver(
+      async (_: unknown, { input }: { input: unknown }, ctx: GraphQLContext) =>
+        login({ ...LoginSchema.parse(input), userAgent: ctx?.userAgent })
+    ),
+
+    refreshSession: wrapResolver(async (_: unknown, args: unknown) => {
+      const { refreshToken } = RefreshSchema.parse(args);
+      const { accessToken } = await refreshSession(refreshToken);
+      return accessToken;
+    }),
+
+    logout: wrapResolver(async (_: unknown, args: unknown) => {
+      const { refreshToken } = RefreshSchema.parse(args);
+      return logout(refreshToken);
+    }),
+
+    logoutAll: wrapResolver(
+      async (_: unknown, __: unknown, ctx: GraphQLContext) =>
+        logoutAll(exigirConta(ctx))
+    ),
+
     saveDashboard: wrapResolver(
       async (_: unknown, { input }: { input: SaveDashboardInput }) => {
         const parsed = SaveDashboardSchema.parse(input);

@@ -1,4 +1,20 @@
 import { GraphQLError } from "graphql";
+import { ZodError } from "zod";
+
+/**
+ * Erro de validação vira frase legível.
+ *
+ * O Zod serializa como JSON com code, path e minimum — informação de
+ * depuração, não mensagem para quem preencheu o formulário. Aqui fica só a
+ * primeira falha, que é a que a pessoa precisa corrigir agora.
+ */
+const mensagemDeValidacao = (err: ZodError): string => {
+  const primeira = err.issues[0];
+  if (!primeira) return "Dados inválidos.";
+
+  const campo = primeira.path.join(".");
+  return campo ? `${campo}: ${primeira.message}` : primeira.message;
+};
 
 const requestTimestamps = new Map<string, number[]>();
 const RATE_LIMIT = 1000;
@@ -38,6 +54,12 @@ export function wrapResolver<T extends (...args: any[]) => any>(
     try {
       return await fn(parent, args, context);
     } catch (err: any) {
+      if (err instanceof ZodError) {
+        throw new GraphQLError(mensagemDeValidacao(err), {
+          extensions: { code: "BAD_USER_INPUT", http: { status: 400 } },
+        });
+      }
+
       console.error(`[Resolver Error] ${fn.name || "anonymous"}:`, err);
       throw new GraphQLError(err.message || "Erro interno no servidor.", {
         extensions: {
