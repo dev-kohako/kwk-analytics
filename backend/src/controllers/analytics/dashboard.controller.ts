@@ -28,7 +28,26 @@ function buildConfig(name: string, config?: Partial<DashboardConfig>): Dashboard
   };
 }
 
-export const saveDashboard = async (name: string, config?: Partial<DashboardConfig>) => {
+type LinhaDashboard = {
+  id: number;
+  name: string;
+  created_at: Date | null;
+  config: unknown;
+};
+
+/**
+ * As três operações usam `$queryRaw` em vez do model API do Prisma.
+ *
+ * O client gerado reconhece `user_id` no DMMF, mas o engine continua
+ * validando contra um schema sem a coluna e recusa o argumento. Como o resto
+ * da camada analítica já fala SQL direto, seguir por aqui entrega o
+ * isolamento por dono sem depender de resolver essa divergência.
+ */
+export const saveDashboard = async (
+  name: string,
+  config?: Partial<DashboardConfig>,
+  userId?: number
+) => {
   if (!name?.trim()) {
     throw new AppError("Nome do dashboard é obrigatório.", 400);
   }
@@ -36,10 +55,11 @@ export const saveDashboard = async (name: string, config?: Partial<DashboardConf
   try {
     const finalConfig = buildConfig(name, config);
 
-    const dashboard = await prisma.dashboard.create({
-      data: { name, config: finalConfig },
-      select: { id: true, name: true, created_at: true, config: true },
-    });
+    const [dashboard] = await prisma.$queryRaw<LinhaDashboard[]>`
+      INSERT INTO dashboard (name, config, user_id)
+      VALUES (${name}, ${JSON.stringify(finalConfig)}::jsonb, ${userId ?? null})
+      RETURNING id, name, created_at, config;
+    `;
 
     return dashboard;
   } catch (err: any) {
@@ -50,28 +70,35 @@ export const saveDashboard = async (name: string, config?: Partial<DashboardConf
   }
 };
 
-export async function getDashboards() {
-  const dashboards = await prisma.dashboard.findMany({
-    orderBy: { created_at: "desc" },
-  });
+/**
+ * Lista só os dashboards da conta.
+ *
+ * Os salvos antes da autenticação têm dono nulo. Ficam fora da listagem em vez
+ * de aparecerem para todos: análise de um cliente na tela de outro é
+ * vazamento, e esconder é reversível.
+ */
+export async function getDashboards(userId: number) {
+  const linhas = await prisma.$queryRaw<LinhaDashboard[]>`
+    SELECT id, name, created_at, config
+    FROM dashboard
+    WHERE user_id = ${userId}
+    ORDER BY created_at DESC;
+  `;
 
-  return dashboards.map((d) => ({
-    ...d,
-    config: d.config ?? {},
-  }));
+  return linhas.map((d) => ({ ...d, config: d.config ?? {} }));
 }
 
-export const getDashboardById = async (id: number) => {
-  try {
-    const dashboard = await prisma.dashboard.findUnique({
-      where: { id },
-      select: { id: true, name: true, created_at: true, config: true },
-    });
+export const getDashboardById = async (id: number, userId: number) => {
+  const [dashboard] = await prisma.$queryRaw<LinhaDashboard[]>`
+    SELECT id, name, created_at, config
+    FROM dashboard
+    WHERE id = ${id} AND user_id = ${userId}
+    LIMIT 1;
+  `;
 
-    if (!dashboard) throw new AppError("Dashboard não encontrado", 404);
+  // Não existir e pertencer a outra conta devolvem a mesma coisa: distinguir
+  // os dois entrega quais ids existem.
+  if (!dashboard) throw new AppError("Dashboard não encontrado", 404);
 
-    return dashboard;
-  } catch (err) {
-    throw new AppError("Erro ao buscar dashboard", 500, err);
-  }
+  return dashboard;
 };

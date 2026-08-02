@@ -145,7 +145,72 @@ export const typeDefs = gql`
     sql: String!
   }
 
+  type Consumo {
+    metric: String!
+    used: Int!
+    limit: Int
+    remaining: Int
+  }
+
+  type PlanoAtual {
+    code: String!
+    name: String!
+    status: String!
+    trialEndsAt: String
+  }
+
+
+
+  type SessaoAtiva {
+    id: ID!
+    userAgent: String
+    createdAt: String!
+    expiresAt: String!
+  }
+
+  type Conta {
+    id: ID!
+    name: String!
+    email: String!
+    createdAt: String
+    plan: PlanoAtual
+    usage: [Consumo!]!
+  }
+
+  "Tokens da sessão. O refresh é revogável; o de acesso dura 15 minutos."
+  type Sessao {
+    accessToken: String!
+    refreshToken: String!
+    user: Conta!
+  }
+
+  input RegisterInput {
+    name: String!
+    email: String!
+    password: String!
+  }
+
+  input LoginInput {
+    email: String!
+    password: String!
+  }
+
+  type Plano {
+    code: String!
+    name: String!
+    priceCents: Int!
+    currency: String!
+    trialDays: Int!
+    limits: JSON
+  }
+
   type Query {
+    "Conta autenticada, ou null quando não há token válido."
+    me: Conta
+    "Planos disponíveis para contratação."
+    plans: [Plano!]!
+    "Sessões abertas da conta, para reconhecer acesso que não é seu."
+    activeSessions: [SessaoAtiva!]!
     dashboards: [Dashboard!]!
     dashboard(id: Int!): Dashboard
     deliveryRegionTrend(
@@ -159,6 +224,22 @@ export const typeDefs = gql`
   }
 
   type Mutation {
+    register(input: RegisterInput!): Sessao!
+    login(input: LoginInput!): Sessao!
+    "Troca o refresh por um novo token de acesso."
+    refreshSession(refreshToken: String!): String!
+    logout(refreshToken: String!): Boolean!
+    "Encerra todas as sessões da conta. Exige estar autenticado."
+    logoutAll: Int!
+    changePassword(currentPassword: String!, newPassword: String!): Boolean!
+    updateProfile(name: String!): Boolean!
+    "Abre o checkout do Stripe e devolve a URL para redirecionar."
+    createCheckout(planCode: String!): String!
+    "Portal do Stripe: trocar cartão, ver faturas, cancelar."
+    createBillingPortal: String!
+    "Envia o link de redefinição. Responde true mesmo se o e-mail não existir."
+    requestPasswordReset(email: String!): Boolean!
+    resetPassword(token: String!, password: String!): Boolean!
     saveDashboard(input: SaveDashboardInput!): Dashboard
   }
 `;
