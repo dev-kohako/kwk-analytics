@@ -51,6 +51,11 @@ import {
   RefreshInput as RefreshSchema,
   RegisterInput as RegisterSchema,
 } from "../validation/auth.zod";
+import {
+  createBillingPortal,
+  createCheckout,
+  listPlans,
+} from "../controllers/billing/billing.controller";
 import type { GraphQLContext } from "./context";
 import {
   exigirDentroDoLimite,
@@ -115,6 +120,8 @@ const mapaBase = {
     me: wrapResolver(async (_: unknown, __: unknown, ctx: GraphQLContext) =>
       ctx?.userId ? currentUser(ctx.userId) : null
     ),
+
+    plans: wrapResolver(async () => listPlans()),
 
     activeSessions: wrapResolver(
       async (_: unknown, __: unknown, ctx: GraphQLContext) =>
@@ -235,6 +242,16 @@ const mapaBase = {
         logoutAll(exigirConta(ctx))
     ),
 
+    createCheckout: wrapResolver(
+      async (_: unknown, { planCode }: { planCode: string }, ctx: GraphQLContext) =>
+        createCheckout(exigirConta(ctx), planCode)
+    ),
+
+    createBillingPortal: wrapResolver(
+      async (_: unknown, __: unknown, ctx: GraphQLContext) =>
+        createBillingPortal(exigirConta(ctx))
+    ),
+
     changePassword: wrapResolver(
       async (_: unknown, args: any, ctx: GraphQLContext) => {
         const { currentPassword, newPassword } = ChangePasswordSchema.parse(args);
@@ -281,6 +298,7 @@ const mapaBase = {
  */
 const PUBLICAS = new Set([
   "me",
+  "plans",
   "register",
   "login",
   "refreshSession",

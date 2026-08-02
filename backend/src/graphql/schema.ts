@@ -195,9 +195,20 @@ export const typeDefs = gql`
     password: String!
   }
 
+  type Plano {
+    code: String!
+    name: String!
+    priceCents: Int!
+    currency: String!
+    trialDays: Int!
+    limits: JSON
+  }
+
   type Query {
     "Conta autenticada, ou null quando não há token válido."
     me: Conta
+    "Planos disponíveis para contratação."
+    plans: [Plano!]!
     "Sessões abertas da conta, para reconhecer acesso que não é seu."
     activeSessions: [SessaoAtiva!]!
     dashboards: [Dashboard!]!
@@ -222,6 +233,10 @@ export const typeDefs = gql`
     logoutAll: Int!
     changePassword(currentPassword: String!, newPassword: String!): Boolean!
     updateProfile(name: String!): Boolean!
+    "Abre o checkout do Stripe e devolve a URL para redirecionar."
+    createCheckout(planCode: String!): String!
+    "Portal do Stripe: trocar cartão, ver faturas, cancelar."
+    createBillingPortal: String!
     "Envia o link de redefinição. Responde true mesmo se o e-mail não existir."
     requestPasswordReset(email: String!): Boolean!
     resetPassword(token: String!, password: String!): Boolean!
