@@ -1,6 +1,9 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { AppSidebar } from "@/components/dashboard/Sidebar";
 import {
@@ -10,6 +13,24 @@ import {
 } from "@/components/ui/sidebar";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const { autenticado, carregando } = useAuth();
+
+  // Espera a renovação do refresh antes de decidir: redirecionar durante a
+  // verificação chutaria para fora quem apenas recarregou a página.
+  useEffect(() => {
+    if (!carregando && !autenticado) router.replace("/entrar");
+  }, [carregando, autenticado, router]);
+
+  if (carregando || !autenticado) {
+    return (
+      <main className="mx-auto w-full max-w-7xl space-y-4 p-6">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </main>
+    );
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />
