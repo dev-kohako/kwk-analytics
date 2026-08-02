@@ -18,7 +18,7 @@ const AI_ENV_KEYS = [
 ];
 
 const summary: InsightSummary = {
-  window: { currentDays: 30, previousDays: 30 },
+  window: { from: "2025-09-08", to: "2025-10-08", currentDays: 30, previousDays: 30 },
   revenue: { current: 1000, previous: 900, deltaPercent: 11.11 },
   orders: { current: 20, previous: 18, deltaPercent: 11.11 },
   averageTicket: { current: 50, previous: 50, deltaPercent: 0 },

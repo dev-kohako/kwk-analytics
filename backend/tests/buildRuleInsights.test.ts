@@ -2,7 +2,7 @@ import { buildRuleInsights } from "../src/controllers/analytics/autoInsights.con
 import type { InsightSummary } from "../src/types/autoInsights.types";
 
 const baseSummary = (overrides: Partial<InsightSummary> = {}): InsightSummary => ({
-  window: { currentDays: 30, previousDays: 30 },
+  window: { from: "2025-09-08", to: "2025-10-08", currentDays: 30, previousDays: 30 },
   revenue: { current: 120_000, previous: 100_000, deltaPercent: 20 },
   orders: { current: 2_000, previous: 1_800, deltaPercent: 11.11 },
   averageTicket: { current: 60, previous: 55.56, deltaPercent: 7.99 },

@@ -40,7 +40,8 @@ export interface AutoInsight {
 
 /** Recorte agregado enviado ao modelo — sem linhas cruas e sem PII. */
 export interface InsightSummary {
-  window: { currentDays: number; previousDays: number };
+  /** Janela analisada. `to` é a última data com venda, não a data de hoje. */
+  window: { from: string; to: string; currentDays: number; previousDays: number };
   revenue: { current: number; previous: number; deltaPercent: number | null };
   orders: { current: number; previous: number; deltaPercent: number | null };
   averageTicket: {
