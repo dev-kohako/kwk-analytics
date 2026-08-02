@@ -21,6 +21,7 @@ import {
   Home,
   LayoutDashboard,
   LineChart,
+  UserRound,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -43,6 +44,13 @@ const navData = {
       url: "/explorar",
       icon: Compass,
     },
+    {
+      title: "Minha conta",
+      url: "/perfil",
+      icon: UserRound,
+
+    },
+
     {
       title: "Dashboards",
       url: "/dashboards",
