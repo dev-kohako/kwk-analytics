@@ -89,7 +89,7 @@ export default function LandingPage() {
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Button>
           </Link>
-          <Link href="/explore">
+          <Link href="/explorar">
             <Button size="lg" variant="outline" className="w-full sm:w-auto">
               <Compass className="h-4 w-4" aria-hidden="true" />
               Montar uma análise

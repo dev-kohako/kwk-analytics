@@ -75,7 +75,7 @@ const handleSaveDashboard = async () => {
 };
 
   return (
-    <main className="py-6 w-full max-w-7xl mx-auto space-y-8 overflow-hidden">
+    <main className="mx-auto w-full max-w-7xl space-y-8 py-6">
       <header className="flex flex-col lg:flex-row items-start lg:items-center lg:justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">

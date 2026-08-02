@@ -42,6 +42,15 @@ const fmtBRL = (value: number): string =>
     minimumFractionDigits: 2,
   }).format(value);
 
+/** "11/09 a 08/10" — o período realmente analisado, não "últimos 30 dias". */
+const fmtPeriodo = (from: string, to: string): string => {
+  const br = (iso: string) => {
+    const [a, m, d] = iso.split("-");
+    return `${d}/${m}`;
+  };
+  return `${br(from)} a ${br(to)}`;
+};
+
 const fmtPct = (value: number): string =>
   `${value > 0 ? "+" : ""}${value.toFixed(1)}%`;
 
@@ -56,37 +65,53 @@ const toISODate = (day: Date | string): string =>
     : String(day).slice(0, 10);
 
 /**
- * Janelas comparadas: os últimos 30 dias contra os 30 imediatamente anteriores.
- * Os limites não se sobrepõem — o dia -30 pertence apenas à janela anterior.
+ * Data mais recente com venda registrada.
+ *
+ * A análise se ancora nela, não em `current_date`: uma base que parou de
+ * receber carga há meses devolveria trinta dias vazios e a tela diria "sem
+ * vendas", como se a operação tivesse parado. Ancorando no dado, a leitura
+ * continua fazendo sentido — e o período fica explícito na mensagem.
  */
-async function loadAggregates() {
+async function loadAnchor(): Promise<Date | null> {
+  const [row] = await prisma.$queryRaw<Array<{ anchor: Date | null }>>`
+    SELECT MAX(sold_date)::date AS anchor FROM mv_sales_fact;
+  `;
+  return row?.anchor ?? null;
+}
+
+/**
+ * Janelas comparadas: os 30 dias até a âncora contra os 30 imediatamente
+ * anteriores. Os limites não se sobrepõem — o dia -30 pertence apenas à
+ * janela anterior.
+ */
+async function loadAggregates(anchor: Date) {
   return prisma.$transaction([
     prisma.$queryRaw<TotalRevenueRow[]>`
       SELECT
         COALESCE(SUM(revenue) FILTER (
-          WHERE sold_date >= current_date - interval '30 days'
+          WHERE sold_date >= ${anchor}::date - interval '30 days'
         ), 0)::float8 AS cur,
         COALESCE(SUM(revenue) FILTER (
-          WHERE sold_date >= current_date - interval '60 days'
-            AND sold_date <  current_date - interval '30 days'
+          WHERE sold_date >= ${anchor}::date - interval '60 days'
+            AND sold_date <  ${anchor}::date - interval '30 days'
         ), 0)::float8 AS prev
       FROM mv_sales_fact;
     `,
     prisma.$queryRaw<OrdersRow[]>`
       SELECT
         COUNT(DISTINCT sale_id) FILTER (
-          WHERE sold_date >= current_date - interval '30 days'
+          WHERE sold_date >= ${anchor}::date - interval '30 days'
         )::int AS cur,
         COUNT(DISTINCT sale_id) FILTER (
-          WHERE sold_date >= current_date - interval '60 days'
-            AND sold_date <  current_date - interval '30 days'
+          WHERE sold_date >= ${anchor}::date - interval '60 days'
+            AND sold_date <  ${anchor}::date - interval '30 days'
         )::int AS prev
       FROM mv_sales_fact;
     `,
     prisma.$queryRaw<DailyRevenueRow[]>`
       SELECT sold_date AS day, COALESCE(SUM(revenue), 0)::float8 AS total
       FROM mv_sales_fact
-      WHERE sold_date >= current_date - interval '30 days'
+      WHERE sold_date >= ${anchor}::date - interval '30 days'
       GROUP BY sold_date
       ORDER BY sold_date;
     `,
@@ -94,15 +119,15 @@ async function loadAggregates() {
       SELECT
         channel AS name,
         COALESCE(SUM(revenue) FILTER (
-          WHERE sold_date >= current_date - interval '30 days'
+          WHERE sold_date >= ${anchor}::date - interval '30 days'
         ), 0)::float8 AS total,
         COALESCE(SUM(revenue) FILTER (
-          WHERE sold_date >= current_date - interval '60 days'
-            AND sold_date <  current_date - interval '30 days'
+          WHERE sold_date >= ${anchor}::date - interval '60 days'
+            AND sold_date <  ${anchor}::date - interval '30 days'
         ), 0)::float8 AS total_prev
       FROM mv_sales_fact
       WHERE channel IS NOT NULL
-        AND sold_date >= current_date - interval '60 days'
+        AND sold_date >= ${anchor}::date - interval '60 days'
       GROUP BY channel
       ORDER BY total DESC;
     `,
@@ -110,15 +135,15 @@ async function loadAggregates() {
       SELECT
         product_name,
         COALESCE(SUM(revenue) FILTER (
-          WHERE sold_date >= current_date - interval '30 days'
+          WHERE sold_date >= ${anchor}::date - interval '30 days'
         ), 0)::float8 AS total,
         COALESCE(SUM(revenue) FILTER (
-          WHERE sold_date >= current_date - interval '60 days'
-            AND sold_date <  current_date - interval '30 days'
+          WHERE sold_date >= ${anchor}::date - interval '60 days'
+            AND sold_date <  ${anchor}::date - interval '30 days'
         ), 0)::float8 AS total_prev
       FROM mv_sales_fact
       WHERE product_name IS NOT NULL
-        AND sold_date >= current_date - interval '60 days'
+        AND sold_date >= ${anchor}::date - interval '60 days'
       GROUP BY product_name
       ORDER BY total DESC
       LIMIT 50;
@@ -126,18 +151,18 @@ async function loadAggregates() {
     prisma.$queryRaw<WeekdayRow[]>`
       SELECT dow::int AS dow, COALESCE(SUM(revenue), 0)::float8 AS total
       FROM mv_sales_fact
-      WHERE sold_date >= current_date - interval '30 days'
+      WHERE sold_date >= ${anchor}::date - interval '30 days'
       GROUP BY dow
       ORDER BY dow;
     `,
     prisma.$queryRaw<DeliveryRow[]>`
       SELECT
         AVG(delivery_minutes) FILTER (
-          WHERE sold_date >= current_date - interval '30 days'
+          WHERE sold_date >= ${anchor}::date - interval '30 days'
         )::float8 AS avg_cur,
         AVG(delivery_minutes) FILTER (
-          WHERE sold_date >= current_date - interval '60 days'
-            AND sold_date <  current_date - interval '30 days'
+          WHERE sold_date >= ${anchor}::date - interval '60 days'
+            AND sold_date <  ${anchor}::date - interval '30 days'
         )::float8 AS avg_prev
       FROM mv_sales_fact
       WHERE delivery_minutes IS NOT NULL;
@@ -146,6 +171,7 @@ async function loadAggregates() {
 }
 
 export function buildSummary(
+  anchor: Date | string,
   revenue: TotalRevenueRow | undefined,
   orders: OrdersRow | undefined,
   daily: DailyRevenueRow[],
@@ -162,8 +188,18 @@ export function buildSummary(
   const ticketCur = ordersCur > 0 ? round(revenueCur / ordersCur) : 0;
   const ticketPrev = ordersPrev > 0 ? round(revenuePrev / ordersPrev) : 0;
 
+  const ate = toISODate(anchor);
+  const de = toISODate(
+    new Date(new Date(ate).getTime() - WINDOW_DAYS * 86_400_000)
+  );
+
   return {
-    window: { currentDays: WINDOW_DAYS, previousDays: WINDOW_DAYS },
+    window: {
+      from: de,
+      to: ate,
+      currentDays: WINDOW_DAYS,
+      previousDays: WINDOW_DAYS,
+    },
     revenue: {
       current: round(revenueCur),
       previous: round(revenuePrev),
@@ -224,11 +260,11 @@ export function buildRuleInsights(
     const dir = toDirection(revenueDelta);
     push({
       id: "revenue-window",
-      title: "Receita dos últimos 30 dias",
+      title: `Receita de ${fmtPeriodo(summary.window.from, summary.window.to)}`,
       message:
         revenueDelta === null
-          ? `A receita dos últimos 30 dias foi de ${fmtBRL(summary.revenue.current)}. Não há base anterior para comparação.`
-          : `A receita dos últimos 30 dias foi de ${fmtBRL(summary.revenue.current)}, ${fmtPct(revenueDelta)} contra os 30 dias anteriores (${fmtBRL(summary.revenue.previous)}).`,
+          ? `A receita entre ${fmtPeriodo(summary.window.from, summary.window.to)} foi de ${fmtBRL(summary.revenue.current)}. Não há base anterior para comparação.`
+          : `A receita entre ${fmtPeriodo(summary.window.from, summary.window.to)} foi de ${fmtBRL(summary.revenue.current)}, ${fmtPct(revenueDelta)} contra os 30 dias anteriores (${fmtBRL(summary.revenue.previous)}).`,
       type: "sales",
       severity: dir === "down" ? "warning" : dir === "up" ? "positive" : "info",
       metric: "revenue",
@@ -278,7 +314,7 @@ export function buildRuleInsights(
     push({
       id: "revenue-trend",
       title: "Tendência dentro do período",
-      message: `Dentro dos últimos 30 dias a receita diária vem ${trend.direction === "up" ? "subindo" : "caindo"} de forma consistente (${fmtPct(trend.changePercent ?? 0)} do início ao fim da janela).`,
+      message: `Dentro do período a receita diária vem ${trend.direction === "up" ? "subindo" : "caindo"} de forma consistente (${fmtPct(trend.changePercent ?? 0)} do início ao fim da janela).`,
       type: "sales",
       severity: trend.direction === "down" ? "warning" : "positive",
       metric: "revenue_daily",
@@ -469,10 +505,16 @@ export function buildRuleInsights(
 }
 
 export const getAutoInsights = async (): Promise<AutoInsight[]> => {
+  const anchor = await loadAnchor();
+
+  // Base sem venda alguma: não há o que analisar, e inventar janela não ajuda.
+  if (!anchor) return [];
+
   const [revenue, orders, daily, channels, products, weekdays, delivery] =
-    await loadAggregates();
+    await loadAggregates(anchor);
 
   const summary = buildSummary(
+    anchor,
     revenue?.[0],
     orders?.[0],
     daily,

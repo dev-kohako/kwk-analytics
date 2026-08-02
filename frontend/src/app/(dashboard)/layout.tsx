@@ -21,7 +21,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             className="mr-2 data-[orientation=vertical]:h-4"
           />
         </header>
-        <div className="flex h-screen bg-background text-foreground mt-14">
+        {/* min-h-screen com padding: h-screen + mt-14 somava 100vh + 3.5rem e
+            cortava o fim da página. */}
+        <div className="flex min-h-screen bg-background text-foreground pt-16">
           <main className="flex-1 flex flex-col">
             <section className="flex-1 p-6">{children}</section>
           </main>

@@ -36,13 +36,13 @@ const ATALHOS = [
     descricao: "Leituras automáticas do período",
   },
   {
-    href: "/explore",
+    href: "/explorar",
     icon: Compass,
     titulo: "Explorar",
     descricao: "Monte sua própria análise",
   },
   {
-    href: "/dashboard",
+    href: "/dashboards",
     icon: LayoutDashboard,
     titulo: "Dashboards",
     descricao: "Suas análises salvas",

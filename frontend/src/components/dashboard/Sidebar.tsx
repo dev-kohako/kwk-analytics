@@ -40,12 +40,12 @@ const navData = {
     },
     {
       title: "Explorar",
-      url: "/explore",
+      url: "/explorar",
       icon: Compass,
     },
     {
       title: "Dashboards",
-      url: "/dashboard",
+      url: "/dashboards",
       icon: LayoutDashboard,
     },
   ],

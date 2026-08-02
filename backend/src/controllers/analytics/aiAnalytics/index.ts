@@ -15,27 +15,50 @@ import type {
 
 const MAX_AI_INSIGHTS = 4;
 
+const TIPOS = [
+  "sales",
+  "channel",
+  "product",
+  "delivery",
+  "customer",
+  "seasonality",
+  "concentration",
+  "anomaly",
+] as const;
+
+const SEVERIDADES = ["positive", "info", "warning", "critical"] as const;
+
+/**
+ * Tolerante de propósito.
+ *
+ * Modelo de linguagem erra rótulo: devolve "revenue" onde o enum espera
+ * "sales", ou "medium" onde espera "warning". Rejeitar o lote inteiro por
+ * causa disso desperdiça a chamada e some com insights bons. O que precisa ser
+ * rígido é o essencial — título e mensagem — e o resto cai num padrão.
+ */
 const AIInsightSchema = z.object({
-  title: z.string().min(3).max(80),
-  message: z.string().min(10).max(320),
-  type: z.enum([
-    "sales",
-    "channel",
-    "product",
-    "delivery",
-    "customer",
-    "seasonality",
-    "concentration",
-    "anomaly",
-  ]),
-  severity: z.enum(["positive", "info", "warning", "critical"]),
-  suggestion: z.string().min(5).max(220).optional(),
-  confidence: z.number().min(0).max(1).optional(),
+  title: z.string().min(3).max(120),
+  message: z.string().min(10).max(400),
+  type: z.string().optional(),
+  severity: z.string().optional(),
+  suggestion: z.string().max(300).optional(),
+  confidence: z.coerce.number().min(0).max(1).optional(),
 });
 
+/** O envelope é permissivo; a validação real acontece item a item. */
 const AIResponseSchema = z.object({
-  insights: z.array(AIInsightSchema).max(8),
+  insights: z.array(z.unknown()).default([]),
 });
+
+const asType = (v: unknown) =>
+  (TIPOS as readonly string[]).includes(String(v))
+    ? (v as (typeof TIPOS)[number])
+    : ("sales" as const);
+
+const asSeverity = (v: unknown) =>
+  (SEVERIDADES as readonly string[]).includes(String(v))
+    ? (v as (typeof SEVERIDADES)[number])
+    : ("info" as const);
 
 const SYSTEM_PROMPT = `Você é um analista de dados de food service. Recebe um resumo agregado de vendas de uma rede de restaurantes e escreve insights curtos e acionáveis para o dono do negócio.
 
@@ -87,14 +110,31 @@ export async function generateAIInsights(
 
   if (!result) return [];
 
-  return result.insights.slice(0, MAX_AI_INSIGHTS).map((insight, index) => ({
-    id: `ai-${index + 1}`,
-    title: stripHTML(insight.title),
-    message: stripHTML(insight.message),
-    type: insight.type,
-    severity: insight.severity,
-    suggestion: insight.suggestion ? stripHTML(insight.suggestion) : undefined,
-    confidence: insight.confidence,
-    generatedBy: "ai" as const,
-  }));
+  // Item a item: um insight malformado não derruba os outros. Rótulo fora do
+  // esperado — "revenue" no lugar de "sales" — cai no padrão em vez de
+  // invalidar a resposta inteira.
+  const validos: AutoInsight[] = [];
+
+  for (const item of result.insights ?? []) {
+    const parsed = AIInsightSchema.safeParse(item);
+    if (!parsed.success) continue;
+
+    const { title, message, suggestion, confidence, type, severity } =
+      parsed.data;
+
+    validos.push({
+      id: `ai-${validos.length + 1}`,
+      title: stripHTML(title),
+      message: stripHTML(message),
+      type: asType(type),
+      severity: asSeverity(severity),
+      suggestion: suggestion ? stripHTML(suggestion) : undefined,
+      confidence,
+      generatedBy: "ai",
+    });
+
+    if (validos.length === MAX_AI_INSIGHTS) break;
+  }
+
+  return validos;
 }

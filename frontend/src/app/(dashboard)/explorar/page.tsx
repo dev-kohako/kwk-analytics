@@ -114,16 +114,12 @@ export default function ExplorePage() {
   const showComparison = Boolean(compare && previous);
 
   return (
-    <main className="py-6 w-full max-w-7xl mx-auto space-y-8 overflow-hidden">
-      <header className="text-center space-y-2">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold flex items-center justify-center gap-2">
-          <Database
-            className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500"
-            aria-hidden="true"
-          />
-          Pivot Builder
-        </h1>
-        <p className="text-muted-foreground text-xs sm:text-sm md:text-base max-w-2xl mx-auto">
+    <main className="mx-auto w-full max-w-7xl space-y-8 py-6">
+      {/* Mesmo cabeçalho das demais telas: alinhado à esquerda, título em
+          2xl, subtítulo em text-sm. Era o único centralizado e em 3xl. */}
+      <header className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight">Explorar dados</h1>
+        <p className="text-sm text-muted-foreground">
           Responda o que quer ver e a plataforma monta a consulta para você.
         </p>
       </header>

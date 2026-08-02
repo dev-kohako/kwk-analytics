@@ -38,7 +38,7 @@ export default function DashboardsList() {
 
   return (
     <main
-      className="py-6 w-full max-w-7xl mx-auto space-y-8 overflow-hidden"
+      className="mx-auto w-full max-w-7xl space-y-8 py-6"
       aria-labelledby="dashboards-heading"
     >
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -111,7 +111,7 @@ export default function DashboardsList() {
                     transition={{ delay: index * 0.05, duration: 0.25 }}
                   >
                     <Link
-                      href={`/dashboard/${d.id}`}
+                      href={`/dashboards/${d.id}`}
                       className="focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg block"
                       aria-label={`Abrir dashboard ${d.name}`}
                     >
