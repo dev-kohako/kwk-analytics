@@ -9,11 +9,11 @@ describe("Dashboard management", () => {
       lines: [{ key: "faturamento", name: "Faturamento" }],
       data: [{ product_id: "Pizza", faturamento: 1000 }],
       showLegend: true,
-    });
+    }, 1);
 
     expect(dash).toHaveProperty("id");
 
-    const dashboards = await getDashboards();
+    const dashboards = await getDashboards(1);
     const found = dashboards.find((d) => d.id === dash.id);
     expect(found).toBeTruthy();
   });

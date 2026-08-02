@@ -96,7 +96,7 @@ const JSONScalar = new GraphQLScalarType({
   },
 });
 
-export const resolvers = {
+const mapaBase = {
   JSON: JSONScalar,
 
   Query: {
@@ -104,14 +104,23 @@ export const resolvers = {
       ctx?.userId ? currentUser(ctx.userId) : null
     ),
 
-    dashboards: wrapResolver(async () =>
-      cacheWrap("dashboards", CACHE_TTLS.DASHBOARDS, () => getDashboards())
+    dashboards: wrapResolver(async (_: unknown, __: unknown, ctx: GraphQLContext) => {
+      const userId = exigirConta(ctx);
+      return cacheWrap(`dashboards:${userId}`, CACHE_TTLS.DASHBOARDS, () =>
+        getDashboards(userId)
+      );
+    }
     ),
 
-    dashboard: wrapResolver(async (_: unknown, { id }: { id: number }) =>
-      cacheWrap(`dashboard:${id}`, CACHE_TTLS.DASHBOARD, () =>
-        getDashboardById(id)
-      )
+    dashboard: wrapResolver(
+      async (_: unknown, { id }: { id: number }, ctx: GraphQLContext) => {
+        const userId = exigirConta(ctx);
+        return cacheWrap(
+          `dashboard:${id}:${userId}`,
+          CACHE_TTLS.DASHBOARD,
+          () => getDashboardById(id, userId)
+        );
+      }
     ),
 
     deliveryRegionTrend: wrapResolver(
@@ -220,10 +229,52 @@ export const resolvers = {
     }),
 
     saveDashboard: wrapResolver(
-      async (_: unknown, { input }: { input: SaveDashboardInput }) => {
+      async (
+        _: unknown,
+        { input }: { input: SaveDashboardInput },
+        ctx: GraphQLContext
+      ) => {
         const parsed = SaveDashboardSchema.parse(input);
-        return saveDashboard(parsed.name, parsed.config);
+        return saveDashboard(parsed.name, parsed.config, exigirConta(ctx));
       }
     ),
   },
+};
+
+/**
+ * Fecha as operações atrás de login.
+ *
+ * A guarda é aplicada sobre o mapa inteiro, não resolver a resolver: assim
+ * uma operação nova nasce protegida por padrão, e abrir ao público vira uma
+ * decisão explícita — em vez de esquecer o guard ser o comportamento padrão.
+ */
+const PUBLICAS = new Set([
+  "me",
+  "register",
+  "login",
+  "refreshSession",
+  "logout",
+  "requestPasswordReset",
+  "resetPassword",
+]);
+
+type Campo = (parent: unknown, args: any, ctx: GraphQLContext) => unknown;
+
+const proteger = (campos: Record<string, Campo>): Record<string, Campo> =>
+  Object.fromEntries(
+    Object.entries(campos).map(([nome, fn]) => [
+      nome,
+      PUBLICAS.has(nome)
+        ? fn
+        : (parent: unknown, args: any, ctx: GraphQLContext) => {
+            exigirConta(ctx);
+            return fn(parent, args, ctx);
+          },
+    ])
+  );
+
+export const resolvers = {
+  ...mapaBase,
+  Query: proteger(mapaBase.Query as Record<string, Campo>),
+  Mutation: proteger(mapaBase.Mutation as Record<string, Campo>),
 };

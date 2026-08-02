@@ -12,7 +12,7 @@ describe("getDashboardById()", () => {
 
     expect(newDash).toHaveProperty("id");
 
-    const found = await getDashboardById(newDash.id);
+    const found = await getDashboardById(newDash.id, 1);
     expect(found).not.toBeNull();
     expect(found?.id).toBe(newDash.id);
     expect(found?.name).toBe("Dashboard Pivot Test");
@@ -20,6 +20,6 @@ describe("getDashboardById()", () => {
 
   it("deve lançar erro se o dashboard não existir", async () => {
     const fakeId = 999999;
-    await expect(getDashboardById(fakeId)).rejects.toThrow(AppError);
+    await expect(getDashboardById(fakeId, 1)).rejects.toThrow(AppError);
   });
 });
