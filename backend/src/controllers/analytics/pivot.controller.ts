@@ -17,6 +17,9 @@ export const runPivot = async (input: PivotInput) => {
       throw new AppError("Ao menos uma métrica é obrigatória.", 400);
     }
 
+    // Precisa cobrir tudo que o cliente pode escolher. Faltavam dow,
+    // hour_of_day e delivery_minutes: as três apareciam no Pivot Builder e
+    // devolviam "campo inválido" ao executar.
     const FIELD_MAP: Record<string, string> = {
       product: "product_name",
       delivery_region: "delivery_region",
@@ -25,9 +28,12 @@ export const runPivot = async (input: PivotInput) => {
       customer_id: "customer_id",
       product_id: "product_id",
       sold_date: "sold_date",
+      dow: "dow",
+      hour_of_day: "hour_of_day",
       revenue: "revenue",
       quantity: "quantity",
       sale_id: "sale_id",
+      delivery_minutes: "delivery_minutes",
     };
 
     for (const m of measures) {
