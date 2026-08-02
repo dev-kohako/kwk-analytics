@@ -11,10 +11,11 @@
 
 | Rota | O que faz |
 |---|---|
-| `/` | Home com atalhos para os três módulos |
-| `/explore` | **Pivot Builder** — dimensões, métricas, filtros, período, comparação, CSV e "salvar como dashboard" |
-| `/dashboard` | Lista de dashboards salvos |
-| `/dashboard/[id]` | Detalhe do dashboard com gráficos e KPIs |
+| `/` | Página de entrada, fora do grupo com barra lateral: explica a plataforma, sem consulta ao banco |
+| `/painel` | Visão geral da operação: indicadores do período e o insight que precisa de atenção |
+| `/explorar` | Montar análise em quatro passos, com comparação, exportação e "salvar como dashboard" |
+| `/dashboards` | Lista de dashboards salvos |
+| `/dashboards/[id]` | Detalhe do dashboard, adaptado ao formato que foi salvo |
 | `/insights` | Insights automáticos com severidade, delta, sugestão e marcação de origem (regra ou IA) |
 
 As rotas internas ficam no route group `(dashboard)`, que aplica o layout com sidebar. `loading.tsx` e `not-found.tsx` cobrem os estados de carregamento e 404.
@@ -35,7 +36,7 @@ As rotas internas ficam no route group `(dashboard)`, que aplica o layout com si
 | **Framer Motion** | Microinterações |
 | **next-themes** | Dark/light mode com persistência |
 | **Sonner** · **Lucide** | Toasts e ícones |
-| **Jest + Testing Library** | 18 arquivos de teste |
+| **Jest + Testing Library** | 64 testes em 18 suítes |
 
 ---
 
@@ -76,21 +77,22 @@ src/
 ├── app/
 │   ├── (dashboard)/
 │   │   ├── layout.tsx            # layout com sidebar
-│   │   ├── dashboard/            # lista + [id]
-│   │   ├── explore/              # Pivot Builder
+│   │   ├── dashboards/          # lista + [id]
+│   │   ├── explorar/            # montar análise
+│   │   ├── painel/              # visão geral
 │   │   └── insights/
 │   ├── layout.tsx · providers.tsx
 │   ├── loading.tsx · not-found.tsx
 │   └── globals.css
 ├── components/
 │   ├── charts/                   # BarChart · LineChart · PieChart · DashboardChart
-│   ├── dashboard/                # FilterBuilder · KpiCard · InsightCard · DashboardCard · Sidebar
+│   ├── dashboard/                # ChipSelect · InsightCard · KpiCard · DashboardContent · Sidebar
 │   └── ui/                       # base shadcn/ui
 ├── hooks/                        # useExplore · useInsights · useDashboards · useDashboardById · useSaveDashboard · useFilterOptions
 ├── queries/                      # documentos GraphQL por domínio
 ├── gql/                          # gerado pelo codegen — não editar
 ├── store/useDashboardStore.ts    # Zustand
-├── lib/                          # apollo/client.ts · utils.ts (inclui exportToCSV)
+├── lib/                          # apollo/client.ts · utils.ts · labels.ts · insights.ts
 ├── types/ · validation/
 └── tests/
 ```
@@ -105,7 +107,7 @@ Cada pasta tem seu `__tests__/` ao lado do código testado.
 bun test
 ```
 
-18 arquivos cobrindo páginas (`ExplorePage`, `InsightsPage`, `DashboardsList`, `DashboardDetailsPage`, `Loading`, `NotFound`), hooks, store e documentos de query. Os testes mockam o Apollo — **não** exigem backend no ar.
+64 testes em 18 suítes, cobrindo páginas, hooks, store e documentos de query. Os testes mockam o Apollo — **não** exigem backend no ar.
 
 ---
 
@@ -122,7 +124,7 @@ bun test
 ## 🧠 Decisões de Arquitetura (ADR)
 
 ### 1. Apollo Client em vez de fetch/REST
-O Pivot Builder monta a query em tempo de execução. Apollo dá cache normalizado, estados de loading/error prontos e integração direta com o Codegen — o que mantém frontend e backend tipados a partir da mesma fonte.
+A tela de Explorar monta a query em tempo de execução. Apollo dá cache normalizado, estados de loading/error prontos e integração direta com o Codegen — o que mantém frontend e backend tipados a partir da mesma fonte.
 
 ### 2. Zustand em vez de Redux ou Context
 O estado global é pequeno: filtros ativos, dashboards e preferências. Redux traria boilerplate desproporcional; Context puro causaria re-render em toda a árvore a cada mudança de filtro.
@@ -163,7 +165,7 @@ Os cards de KPI leem `value`/`previousValue`/`deltaPercent` dos insights. Métri
 - **Sem autenticação** — não há login nem escopo por usuário; a API é aberta
 - **Sem compartilhamento por link público** — os dashboards são globais para quem acessa a aplicação
 - **`bun run codegen` depende de `tsx`**, que não está declarado no `package.json`; enquanto isso, use `bunx graphql-codegen --config codegen.ts`, que funciona
-- **`delivery_minutes` retorna zero** — limitação do dataset, detalhada no [README do backend](../backend/README.md#-performance-e-escalabilidade)
+- **A análise se ancora na última venda registrada**, não na data de hoje: numa base sem carga recente, o período analisado não é o mês corrente
 
 ---
 

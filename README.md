@@ -25,7 +25,7 @@ O KWK Analytics resolve isso com três pilares:
 
 | Pilar | O que entrega |
 |---|---|
-| **Explorar** | Um Pivot Builder: escolha dimensões, métricas, filtros e período — sem escrever SQL |
+| **Explorar** | Um roteiro de quatro passos: escolha o que medir, como separar e o período — sem escrever SQL |
 | **Dashboards** | Salve qualquer análise como dashboard e reabra depois com gráficos e KPIs |
 | **Insights** | Leituras automáticas do período (canal líder, produto destaque, tempo de entrega) |
 
@@ -33,7 +33,7 @@ O KWK Analytics resolve isso com três pilares:
 
 ## ✨ Funcionalidades
 
-### 1. Explorar (Pivot Builder) — `/explore`
+### 1. Explorar — `/explorar`
 - Dimensões disponíveis: `store_id`, `channel`, `product_id`, `customer_id`, `sold_date`, `dow`, `hour_of_day`, `delivery_region`
 - Métricas: `sum`, `avg`, `count`, `count_distinct` sobre `revenue`, `quantity`, `sale_id`, `customer_id`, `delivery_minutes`
 - Filtros dinâmicos com autocomplete de valores reais (`pivotFieldValues`)
@@ -42,13 +42,13 @@ O KWK Analytics resolve isso com três pilares:
 - **Salvar como dashboard** em um clique
 - A query exibe o **SQL gerado** — transparência total sobre o que foi executado
 
-### 2. Dashboards — `/dashboard` e `/dashboard/[id]`
+### 2. Dashboards — `/dashboards` e `/dashboards/[id]`
 - Lista de dashboards salvos (persistidos no Postgres como `config` JSON)
 - Gráficos de barra, linha e pizza (Recharts) + KPI cards
 - Análises prontas: **Top Produtos**, **Tendência de entrega por região**, **Lost but Loyal** (clientes fiéis que pararam de comprar)
 
 ### 3. Insights automáticos — `/insights`
-Duas camadas sobre os últimos 30 dias contra os 30 anteriores:
+Duas camadas sobre os 30 dias até a última venda registrada, contra os 30 anteriores:
 
 - **Determinística (sempre presente):** variação de receita, pedidos e ticket médio; tendência por regressão linear; dias fora do padrão por z-score; concentração de Pareto; sazonalidade por dia da semana; canal em retração
 - **IA (opcional):** com uma chave de provedor gratuito configurada, um modelo lê o mesmo resumo agregado e acrescenta leituras marcadas com `generatedBy: ai`
@@ -56,6 +56,7 @@ Duas camadas sobre os últimos 30 dias contra os 30 anteriores:
 - Sinal sem lastro é omitido, não preenchido com zero
 
 ### 4. UX
+- Página de entrada estática em `/` e visão geral da operação em `/painel`
 - Mobile-first, dark/light mode (`next-themes`), skeleton loaders, estados de vazio/erro
 - Microinterações com Motion, feedback com Sonner, componentes acessíveis (Radix/shadcn)
 
@@ -81,7 +82,7 @@ Monorepo com dois módulos independentes:
 ```
 
 ### Fluxo de uma análise
-1. O usuário monta dimensões, métricas e filtros no Pivot Builder.
+1. O usuário monta a análise em Explorar, escolhendo métricas, cortes e período.
 2. O frontend envia um `PivotInput` dinâmico para o resolver `pivot`.
 3. O backend valida com **Zod** e passa por um **allow-list** de campos (`src/lib/sql.ts`) — nenhum identificador vem do usuário sem checagem, o que fecha a porta para SQL injection.
 4. A query roda sobre a materialized view `mv_sales_fact`, que já resolve os joins pesados (vendas × produtos × lojas × canais × clientes).
@@ -112,7 +113,7 @@ Monorepo com dois módulos independentes:
 | **PostgreSQL 16** | Banco relacional + materialized view |
 | **Zod** | Validação dos inputs GraphQL e da saída do modelo |
 | **Redis** (opcional) | Cache L2 compartilhado entre réplicas |
-| **LLM OpenAI-compatible** (opcional) | Camada de IA sobre os insights — Groq, OpenRouter, Ollama ou DeepSeek |
+| **LLM OpenAI-compatible** (opcional) | Camada de IA sobre os insights — Groq, Gemini, OpenRouter, Ollama ou DeepSeek |
 | **Jest** | Testes unitários e de integração |
 | **Docker Compose** | Backend + banco em um comando |
 
@@ -291,8 +292,9 @@ ADRs completos: [frontend/README.md](frontend/README.md) e [backend/README.md](b
 ├── frontend/
 │   └── src/
 │       ├── app/
-│       │   ├── (dashboard)/dashboard/[id]/
-│       │   ├── (dashboard)/explore/
+│       │   ├── (dashboard)/dashboards/[id]/
+│       │   ├── (dashboard)/explorar/
+│       │   ├── (dashboard)/painel/
 │       │   └── (dashboard)/insights/
 │       ├── components/            # charts/ · dashboard/ · ui/
 │       ├── hooks/                 # useExplore, useInsights, useDashboardById…

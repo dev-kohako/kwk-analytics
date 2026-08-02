@@ -11,7 +11,7 @@
 
 - **Pivot dinâmico** — o cliente escolhe dimensões, métricas e filtros; o servidor monta o SQL
 - **Comparação entre períodos** — Δ absoluto e Δ% calculados no backend
-- **Insights automáticos** — leituras textuais dos últimos 30 dias vs. os 30 anteriores
+- **Insights automáticos** — leituras dos 30 dias até a última venda vs. os 30 anteriores
 - **Dashboards persistidos** — salvos como JSON no Postgres
 - **Análises prontas** — top produtos, tendência de entrega por região, clientes perdidos
 
@@ -71,7 +71,7 @@ backend/
 │   └── index.ts                 # bootstrap do Apollo Server
 ├── sql/
 │   └── mv_sales_fact.sql        # DDL da materialized view (setup obrigatório)
-├── tests/                       # 10 suítes de integração
+├── tests/                       # 13 suítes (5 unitárias, 8 de integração)
 ├── Dockerfile
 ├── jest.config.js
 └── .env.example
@@ -100,7 +100,7 @@ O `.env.example` traz as combinações prontas de `AI_BASE_URL`/`AI_MODEL` para 
 ```
 🚀 Analytics GraphQL ready at http://localhost:4000/
    cache:   memory + redis
-   insights: regras + IA (llama-3.3-70b-versatile)
+   insights: regras + IA (groq/llama-3.3-70b-versatile)
 ```
 
 ### Com Docker (a partir da **raiz** do repositório)
