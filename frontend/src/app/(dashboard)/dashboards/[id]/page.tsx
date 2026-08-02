@@ -45,7 +45,7 @@ export default function DashboardDetailsPage() {
   }
 
   return (
-    <main className="py-6 w-full max-w-7xl mx-auto space-y-8 overflow-hidden">
+    <main className="mx-auto w-full max-w-7xl space-y-8 py-6">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-center sm:text-left">
           {dashboard.name}

@@ -60,7 +60,7 @@ describe("ExplorePage", () => {
     render(<ExplorePage />);
 
     expect(
-      screen.getByRole("heading", { name: /pivot builder/i })
+      screen.getByRole("heading", { name: /explorar dados/i })
     ).toBeInTheDocument();
     expect(screen.getByText(/montar análise/i)).toBeInTheDocument();
     expect(screen.getByText(/o que você quer ver/i)).toBeInTheDocument();
