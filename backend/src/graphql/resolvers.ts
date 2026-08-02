@@ -45,6 +45,11 @@ import {
   RegisterInput as RegisterSchema,
 } from "../validation/auth.zod";
 import type { GraphQLContext } from "./context";
+import {
+  exigirDentroDoLimite,
+  registrarUso,
+  type Metrica,
+} from "../lib/limits";
 
 /** Recusa o acesso quando não há sessão — usado pelos resolvers protegidos. */
 const exigirConta = (ctx: GraphQLContext): number => {
@@ -260,15 +265,36 @@ const PUBLICAS = new Set([
 
 type Campo = (parent: unknown, args: any, ctx: GraphQLContext) => unknown;
 
+/**
+ * Operações que consomem cota. O limite é verificado antes de executar e
+ * contado só depois do sucesso — cobrar por tentativa que falhou vira
+ * reclamação de suporte, não receita.
+ */
+const COTA: Record<string, Metrica> = {
+  pivot: "analyses",
+  topProducts: "analyses",
+  deliveryRegionTrend: "analyses",
+  autoInsights: "aiInsights",
+  saveDashboard: "dashboards",
+};
+
 const proteger = (campos: Record<string, Campo>): Record<string, Campo> =>
   Object.fromEntries(
     Object.entries(campos).map(([nome, fn]) => [
       nome,
       PUBLICAS.has(nome)
         ? fn
-        : (parent: unknown, args: any, ctx: GraphQLContext) => {
-            exigirConta(ctx);
-            return fn(parent, args, ctx);
+        : async (parent: unknown, args: any, ctx: GraphQLContext) => {
+            const userId = exigirConta(ctx);
+            const metrica = COTA[nome];
+
+            if (metrica) await exigirDentroDoLimite(userId, metrica);
+
+            const resultado = await fn(parent, args, ctx);
+
+            if (metrica) await registrarUso(userId, metrica);
+
+            return resultado;
           },
     ])
   );

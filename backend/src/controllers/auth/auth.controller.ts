@@ -1,4 +1,5 @@
 import prisma from "../../lib/prisma";
+import { consumo } from "../../lib/limits";
 import { AppError } from "../../utils/errors";
 import {
   hashPassword,
@@ -155,8 +156,16 @@ export async function currentUser(userId: number) {
     include: { plan: true },
   });
 
+  const uso = await consumo(userId);
+
   return {
     ...publicUser(user),
+    usage: uso.map((u) => ({
+      metric: u.metrica,
+      used: u.usado,
+      limit: u.limite,
+      remaining: u.restante,
+    })),
     createdAt: user.created_at.toISOString(),
     plan: sub
       ? {

@@ -145,11 +145,26 @@ export const typeDefs = gql`
     sql: String!
   }
 
+  type Consumo {
+    metric: String!
+    used: Int!
+    limit: Int
+    remaining: Int
+  }
+
   type PlanoAtual {
     code: String!
     name: String!
     status: String!
     trialEndsAt: String
+  }
+
+  "Consumo de uma métrica no período. Limite nulo significa ilimitado."
+  type Consumo {
+    metric: String!
+    used: Int!
+    limit: Int
+    remaining: Int
   }
 
   type Conta {
@@ -158,6 +173,7 @@ export const typeDefs = gql`
     email: String!
     createdAt: String
     plan: PlanoAtual
+    usage: [Consumo!]!
   }
 
   "Tokens da sessão. O refresh é revogável; o de acesso dura 15 minutos."
